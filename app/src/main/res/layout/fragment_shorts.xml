@@ -26,7 +26,7 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_bolt"
+            app:srcCompat="@drawable/ic_bolt"
             app:tint="@color/blaze_green_bright" />
 
         <TextView

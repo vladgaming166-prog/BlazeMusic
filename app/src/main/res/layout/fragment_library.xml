@@ -27,7 +27,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_new_playlist"
-            android:src="@drawable/ic_add" />
+            app:srcCompat="@drawable/ic_add" />
 
         <ImageButton
             android:id="@+id/library_rescan"
@@ -35,7 +35,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_rescan"
-            android:src="@drawable/ic_refresh" />
+            app:srcCompat="@drawable/ic_refresh" />
     </LinearLayout>
 
     <HorizontalScrollView
@@ -157,7 +157,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:importantForAccessibility="no"
-            android:src="@drawable/ic_info"
+            app:srcCompat="@drawable/ic_info"
             app:tint="@color/bm_on_warning_container" />
 
         <TextView

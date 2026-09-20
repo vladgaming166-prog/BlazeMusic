@@ -33,7 +33,7 @@
             android:background="@drawable/bg_playing_scrim"
             android:importantForAccessibility="no"
             android:padding="16dp"
-            android:src="@drawable/ic_play"
+            app:srcCompat="@drawable/ic_play"
             android:visibility="gone"
             app:tint="@color/blaze_green_bright" />
     </FrameLayout>
@@ -102,5 +102,5 @@
         android:layout_width="@dimen/touch_target"
         android:layout_height="@dimen/touch_target"
         android:contentDescription="@string/action_more_options"
-        android:src="@drawable/ic_more_vert" />
+        app:srcCompat="@drawable/ic_more_vert" />
 </LinearLayout>

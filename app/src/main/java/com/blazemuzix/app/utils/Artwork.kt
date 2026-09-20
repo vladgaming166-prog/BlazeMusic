@@ -56,8 +56,8 @@ object Artwork {
             .error(placeholder)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
         if (lowEnd) options = options.format(DecodeFormat.PREFER_RGB_565)
-        val request = Glide.with(view).load(if (url.startsWith("content://")) Uri.parse(url) else url).apply(options)
-        if (prefs.reducedAnimations) request.dontAnimate()
+        var request = Glide.with(view).load(if (url.startsWith("content://")) Uri.parse(url) else url).apply(options)
+        if (prefs.reducedAnimations) request = request.dontAnimate()
         request.into(view)
     }
 

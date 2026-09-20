@@ -1,5 +1,7 @@
 package com.blazemuzix.app.data.models
 
+import androidx.annotation.StringRes
+
 /** One page of provider results. [nextPageToken] is null when the provider has no more results. */
 data class Page<T>(
     val items: List<T>,
@@ -17,7 +19,8 @@ enum class SectionLayout { CARDS, WIDE_CARDS, ROWS }
 /** A horizontal/vertical group of items on the Home screen. */
 data class Section(
     val id: String,
-    val title: String,
+    /** Localised title resource; keeps providers free of hardcoded UI text. */
+    @StringRes val titleRes: Int,
     val items: List<MediaItem>,
     val layout: SectionLayout = SectionLayout.CARDS,
     val source: Source? = null

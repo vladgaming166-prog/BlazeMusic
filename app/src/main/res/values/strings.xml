@@ -63,6 +63,7 @@
     <string name="section_new_releases">New releases on Spotify</string>
     <string name="section_popular">Popular tracks</string>
     <string name="section_featured_playlists">Featured playlists</string>
+    <string name="section_youtube_playlists">Music playlists on YouTube</string>
     <string name="section_artists">Artists</string>
     <string name="section_albums">Albums</string>
     <string name="section_local">On this device</string>

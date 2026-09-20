@@ -1,5 +1,6 @@
 package com.blazemuzix.app.data.repository
 
+import com.blazemuzix.app.R
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.MediaType
 import com.blazemuzix.app.data.models.Page
@@ -41,7 +42,7 @@ class DiscoveryRepository(
         val errors = ArrayList<Throwable>()
 
         recent.await().takeIf { it.isNotEmpty() }?.let {
-            sections.add(Section("recent", "Recently played", it, SectionLayout.CARDS))
+            sections.add(Section("recent", R.string.section_recently_played, it, SectionLayout.CARDS))
         }
         val localSections = local.await()
         val onlineSections = ArrayList<Section>()

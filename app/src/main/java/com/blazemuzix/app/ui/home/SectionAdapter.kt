@@ -80,7 +80,7 @@ class SectionAdapter(private val listener: Listener) : ListAdapter<Section, Sect
 
         fun bind(section: Section, nowPlayingId: String?, scrollStates: Map<String, Int>) {
             this.section = section
-            title.text = section.title
+            title.setText(section.titleRes)
             source.visible(section.source != null)
             source.text = section.source?.label
             adapter.nowPlayingId = nowPlayingId

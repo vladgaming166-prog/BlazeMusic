@@ -1,5 +1,6 @@
 package com.blazemuzix.app.providers
 
+import com.blazemuzix.app.R
 import com.blazemuzix.app.data.cache.ResponseCache
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.MediaType
@@ -72,10 +73,10 @@ class YouTubeProvider(
             val playlists = async { runCatching { musicPlaylists() }.getOrDefault(emptyList()) }
             listOfNotNull(
                 trending.await().takeIf { it.isNotEmpty() }?.let {
-                    Section("yt_trending", "Trending on YouTube", it, SectionLayout.WIDE_CARDS, Source.YOUTUBE)
+                    Section("yt_trending", R.string.section_trending, it, SectionLayout.WIDE_CARDS, Source.YOUTUBE)
                 },
                 playlists.await().takeIf { it.isNotEmpty() }?.let {
-                    Section("yt_playlists", "Music playlists on YouTube", it, SectionLayout.CARDS, Source.YOUTUBE)
+                    Section("yt_playlists", R.string.section_youtube_playlists, it, SectionLayout.CARDS, Source.YOUTUBE)
                 }
             )
         }

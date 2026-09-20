@@ -19,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
@@ -46,6 +47,7 @@ class WebPlayerActivity : AppCompatActivity() {
     private lateinit var item: MediaItem
     private lateinit var state: StateView
     private var customView: View? = null
+    private var chromeClient: WebChromeClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,7 +120,7 @@ class WebPlayerActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         }
         web.setBackgroundColor(0xFF0B0D0C.toInt())
-        web.webChromeClient = object : WebChromeClient() {
+        val chromeClient = object : WebChromeClient() {
             override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
                 if (view == null) return
                 customView = view
@@ -130,6 +132,8 @@ class WebPlayerActivity : AppCompatActivity() {
                 customView = null
             }
         }
+        this.chromeClient = chromeClient
+        web.webChromeClient = chromeClient
         web.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 progress.visible(true)
@@ -142,9 +146,11 @@ class WebPlayerActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean = handleNavigation(url)
 
+            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean =
                 handleNavigation(request?.url?.toString())
 
+            @RequiresApi(Build.VERSION_CODES.M)
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                 if (request?.isForMainFrame == true) showLoadError()
             }
@@ -195,7 +201,7 @@ class WebPlayerActivity : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (customView != null) {
-            webView?.webChromeClient?.onHideCustomView()
+            chromeClient?.onHideCustomView()
             return
         }
         @Suppress("DEPRECATION")

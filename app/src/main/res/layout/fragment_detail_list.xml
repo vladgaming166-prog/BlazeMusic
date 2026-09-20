@@ -23,7 +23,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_back"
-            android:src="@drawable/ic_arrow_back" />
+            app:srcCompat="@drawable/ic_arrow_back" />
 
         <TextView
             android:id="@+id/detail_toolbar_title"
@@ -40,7 +40,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_more_options"
-            android:src="@drawable/ic_more_vert" />
+            app:srcCompat="@drawable/ic_more_vert" />
     </LinearLayout>
 
     <LinearLayout

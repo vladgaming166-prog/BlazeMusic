@@ -34,7 +34,7 @@
         android:contentDescription="@string/action_play"
         android:padding="20dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_play"
+        app:srcCompat="@drawable/ic_play"
         app:tint="@color/white" />
 
     <LinearLayout
@@ -52,7 +52,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_save"
-            android:src="@drawable/ic_bookmark_border"
+            app:srcCompat="@drawable/ic_bookmark_border"
             app:tint="@color/white" />
 
         <ImageButton
@@ -62,7 +62,7 @@
             android:layout_height="@dimen/touch_target"
             android:layout_marginTop="@dimen/space_s"
             android:contentDescription="@string/action_favorite"
-            android:src="@drawable/ic_favorite_border"
+            app:srcCompat="@drawable/ic_favorite_border"
             app:tint="@color/white" />
 
         <ImageButton
@@ -72,7 +72,7 @@
             android:layout_height="@dimen/touch_target"
             android:layout_marginTop="@dimen/space_s"
             android:contentDescription="@string/action_share"
-            android:src="@drawable/ic_share"
+            app:srcCompat="@drawable/ic_share"
             app:tint="@color/white" />
 
         <ImageButton
@@ -82,7 +82,7 @@
             android:layout_height="@dimen/touch_target"
             android:layout_marginTop="@dimen/space_s"
             android:contentDescription="@string/action_open_in_youtube"
-            android:src="@drawable/ic_open_in_new"
+            app:srcCompat="@drawable/ic_open_in_new"
             app:tint="@color/white" />
     </LinearLayout>
 

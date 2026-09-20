@@ -33,7 +33,7 @@
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:contentDescription="@string/cd_offline_indicator"
-            android:src="@drawable/ic_wifi_off"
+            app:srcCompat="@drawable/ic_wifi_off"
             app:tint="@color/bm_on_warning_container" />
 
         <TextView

@@ -17,7 +17,7 @@
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_history"
+        app:srcCompat="@drawable/ic_history"
         app:tint="?android:textColorSecondary" />
 
     <TextView
@@ -36,5 +36,5 @@
         android:layout_width="@dimen/touch_target"
         android:layout_height="@dimen/touch_target"
         android:contentDescription="@string/action_remove"
-        android:src="@drawable/ic_close" />
+        app:srcCompat="@drawable/ic_close" />
 </LinearLayout>

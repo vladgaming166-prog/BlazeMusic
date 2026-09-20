@@ -1,6 +1,7 @@
 package com.blazemuzix.app.providers
 
 import android.util.Base64
+import com.blazemuzix.app.R
 import com.blazemuzix.app.data.cache.ResponseCache
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.MediaType
@@ -114,10 +115,10 @@ class SpotifyProvider(
             val popular = async { runCatching { popularTracks() }.getOrDefault(emptyList()) }
             listOfNotNull(
                 releases.await().takeIf { it.isNotEmpty() }?.let {
-                    Section("sp_new_releases", "New releases on Spotify", it, SectionLayout.CARDS, Source.SPOTIFY)
+                    Section("sp_new_releases", R.string.section_new_releases, it, SectionLayout.CARDS, Source.SPOTIFY)
                 },
                 popular.await().takeIf { it.isNotEmpty() }?.let {
-                    Section("sp_popular", "Popular tracks", it, SectionLayout.ROWS, Source.SPOTIFY)
+                    Section("sp_popular", R.string.section_popular, it, SectionLayout.ROWS, Source.SPOTIFY)
                 }
             )
         }

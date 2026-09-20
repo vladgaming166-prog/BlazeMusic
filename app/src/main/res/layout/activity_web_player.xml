@@ -82,7 +82,7 @@
                 android:layout_height="@dimen/touch_target"
                 android:layout_marginLeft="@dimen/space_s"
                 android:contentDescription="@string/action_favorite"
-                android:src="@drawable/ic_favorite_border" />
+                app:srcCompat="@drawable/ic_favorite_border" />
 
             <ImageButton
                 android:id="@+id/web_save"
@@ -90,7 +90,7 @@
                 android:layout_width="@dimen/touch_target"
                 android:layout_height="@dimen/touch_target"
                 android:contentDescription="@string/action_save"
-                android:src="@drawable/ic_bookmark_border" />
+                app:srcCompat="@drawable/ic_bookmark_border" />
 
             <ImageButton
                 android:id="@+id/web_share"
@@ -98,7 +98,7 @@
                 android:layout_width="@dimen/touch_target"
                 android:layout_height="@dimen/touch_target"
                 android:contentDescription="@string/action_share"
-                android:src="@drawable/ic_share" />
+                app:srcCompat="@drawable/ic_share" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

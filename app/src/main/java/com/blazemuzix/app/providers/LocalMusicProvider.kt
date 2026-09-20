@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
+import com.blazemuzix.app.R
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.MediaType
 import com.blazemuzix.app.data.models.Page
@@ -118,7 +119,7 @@ class LocalMusicProvider(context: Context) : MusicProvider {
         val songs = allSongs()
         if (songs.isEmpty()) return emptyList()
         return listOf(
-            Section("local_recent", "On this device", songs.sortedByDescending { it.providerId.toLongOrNull() ?: 0L }.take(20), SectionLayout.CARDS, Source.LOCAL)
+            Section("local_recent", R.string.section_local, songs.sortedByDescending { it.providerId.toLongOrNull() ?: 0L }.take(20), SectionLayout.CARDS, Source.LOCAL)
         )
     }
 
@@ -161,7 +162,7 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                 val dataIdx = c.getColumnIndex(MediaStore.Audio.Media.DATA)
                 while (c.moveToNext()) {
                     val id = c.getLong(idIdx)
-                    val artist = c.getString(artistIdx)?.takeIf { it.isNotBlank() && it != MediaStore.UNKNOWN_STRING } ?: "Unknown artist"
+                    val artist = c.getString(artistIdx)?.takeIf { it.isNotBlank() && it != MediaStore.UNKNOWN_STRING } ?: appContext.getString(R.string.unknown_artist)
                     val album = c.getString(albumIdx)?.takeIf { it.isNotBlank() && it != MediaStore.UNKNOWN_STRING }
                     val albumId = c.getLong(albumIdIdx)
                     val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
@@ -170,7 +171,7 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                             id = MediaItem.makeId(Source.LOCAL, MediaType.SONG, id.toString()),
                             source = Source.LOCAL,
                             type = MediaType.SONG,
-                            title = c.getString(titleIdx)?.takeIf { it.isNotBlank() } ?: "Unknown title",
+                            title = c.getString(titleIdx)?.takeIf { it.isNotBlank() } ?: appContext.getString(R.string.unknown_title),
                             artist = artist,
                             album = album,
                             artworkUrl = if (albumId > 0) albumArtUri(albumId).toString() else null,

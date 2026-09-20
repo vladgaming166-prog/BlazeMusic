@@ -715,13 +715,13 @@ class PlaybackService : Service() {
             .setShowWhen(false)
             .setOngoing(playing)
             .setColor(ContextCompat.getColor(this, R.color.blaze_green))
-            .addAction(R.drawable.ic_skip_previous, getString(R.string.action_previous), actionIntent(ACTION_PREVIOUS, 11))
+            .addAction(notifIcon(R.drawable.ic_skip_previous, R.drawable.ic_notif_prev), getString(R.string.action_previous), actionIntent(ACTION_PREVIOUS, 11))
             .addAction(
-                if (playing) R.drawable.ic_pause else R.drawable.ic_play,
+                if (playing) notifIcon(R.drawable.ic_pause, R.drawable.ic_notif_pause) else notifIcon(R.drawable.ic_play, R.drawable.ic_notif_play),
                 getString(if (playing) R.string.action_pause else R.string.action_play),
                 actionIntent(ACTION_TOGGLE, 12)
             )
-            .addAction(R.drawable.ic_skip_next, getString(R.string.action_next), actionIntent(ACTION_NEXT, 13))
+            .addAction(notifIcon(R.drawable.ic_skip_next, R.drawable.ic_notif_next), getString(R.string.action_next), actionIntent(ACTION_NEXT, 13))
             .setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(session.sessionToken)
@@ -731,6 +731,10 @@ class PlaybackService : Service() {
             )
         return builder.build()
     }
+
+    /** SystemUI on API < 21 cannot inflate vector drawables, so notification actions fall back to PNGs there. */
+    private fun notifIcon(vector: Int, legacyPng: Int): Int =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) vector else legacyPng
 
     private fun goForeground(notification: Notification) {
         try {

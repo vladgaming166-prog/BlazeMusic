@@ -61,7 +61,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/cd_play_pause"
-            android:src="@drawable/ic_play"
+            app:srcCompat="@drawable/ic_play"
             app:tint="?android:textColorPrimary" />
 
         <ImageButton
@@ -70,7 +70,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/action_next"
-            android:src="@drawable/ic_skip_next"
+            app:srcCompat="@drawable/ic_skip_next"
             app:tint="?android:textColorPrimary" />
     </LinearLayout>
 

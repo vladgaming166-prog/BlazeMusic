@@ -20,7 +20,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:contentDescription="@string/cd_brand_logo"
-            android:src="@drawable/ic_brand_mark" />
+            app:srcCompat="@drawable/ic_brand_mark" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -49,7 +49,7 @@
             android:layout_width="@dimen/touch_target"
             android:layout_height="@dimen/touch_target"
             android:contentDescription="@string/title_settings"
-            android:src="@drawable/ic_settings" />
+            app:srcCompat="@drawable/ic_settings" />
     </LinearLayout>
 
     <FrameLayout
