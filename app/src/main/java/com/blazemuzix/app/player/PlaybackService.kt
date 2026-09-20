@@ -133,10 +133,13 @@ class PlaybackService : Service() {
             ACTION_TOGGLE_SHUFFLE -> toggleShuffle()
             ACTION_CYCLE_REPEAT -> cycleRepeat()
             ACTION_STOP -> stopPlayback()
-            else -> if (currentItem == null) stopIfIdle()
+            else -> Unit
         }
-        // Android 8+ requires a foreground notification shortly after startForegroundService().
-        if (currentItem != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isForeground) {
+        // Android 8+ requires a foreground notification shortly after startForegroundService();
+        // when nothing is loaded we stop immediately instead, which also satisfies that rule.
+        if (currentItem == null) {
+            stopIfIdle()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !isForeground) {
             goForeground(buildNotification())
         }
         return START_NOT_STICKY
