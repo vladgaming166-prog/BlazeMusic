@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/offline_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_m"
+        android:layout_marginRight="@dimen/space_m"
+        android:layout_marginBottom="@dimen/space_s"
+        android:background="@drawable/bg_offline_banner"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_m"
+        android:paddingTop="@dimen/space_s"
+        android:paddingRight="@dimen/space_m"
+        android:paddingBottom="@dimen/space_s"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:contentDescription="@string/cd_offline_indicator"
+            android:src="@drawable/ic_wifi_off"
+            app:tint="@color/bm_on_warning_container" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_s"
+            android:layout_weight="1"
+            android:text="@string/state_offline_banner"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+            android:textColor="@color/bm_on_warning_container" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/mini_player"
+        layout="@layout/layout_mini_player" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/bm_divider" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:menu="@menu/menu_bottom_nav" />
+</LinearLayout>

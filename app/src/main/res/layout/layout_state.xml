@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/state_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/space_xxl"
+    android:paddingRight="@dimen/space_xxl"
+    android:paddingBottom="@dimen/space_xxl"
+    android:visibility="gone">
+
+    <ProgressBar
+        android:id="@+id/state_progress"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:indeterminateTint="@color/bm_primary"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/state_icon_container"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/bg_state_icon">
+
+        <ImageView
+            android:id="@+id/state_icon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_music_note"
+            app:tint="@color/bm_on_primary_container" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/state_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xl"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Title" />
+
+    <TextView
+        android:id="@+id/state_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp"
+        android:maxWidth="320dp"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+        android:textColor="?android:textColorSecondary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/state_action"
+        style="@style/Widget.BlazeMuzix.Button.Tonal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xl"
+        android:text="@string/action_retry"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/state_secondary"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:visibility="gone" />
+</LinearLayout>

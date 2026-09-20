@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/web_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationIcon="@drawable/ic_arrow_back" />
+
+    <FrameLayout
+        android:id="@+id/web_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/blaze_black">
+
+        <ProgressBar
+            android:id="@+id/web_progress"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/blaze_green_bright" />
+
+        <include
+            android:id="@+id/web_state"
+            layout="@layout/layout_state" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_l">
+
+        <TextView
+            android:id="@+id/web_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Title" />
+
+        <TextView
+            android:id="@+id/web_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
+
+        <TextView
+            android:id="@+id/web_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/web_open_app"
+                style="@style/Widget.BlazeMuzix.Button.Tonal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:icon="@drawable/ic_open_in_new"
+                app:iconGravity="textStart" />
+
+            <ImageButton
+                android:id="@+id/web_favorite"
+                style="@style/Widget.BlazeMuzix.IconButton"
+                android:layout_width="@dimen/touch_target"
+                android:layout_height="@dimen/touch_target"
+                android:layout_marginLeft="@dimen/space_s"
+                android:contentDescription="@string/action_favorite"
+                android:src="@drawable/ic_favorite_border" />
+
+            <ImageButton
+                android:id="@+id/web_save"
+                style="@style/Widget.BlazeMuzix.IconButton"
+                android:layout_width="@dimen/touch_target"
+                android:layout_height="@dimen/touch_target"
+                android:contentDescription="@string/action_save"
+                android:src="@drawable/ic_bookmark_border" />
+
+            <ImageButton
+                android:id="@+id/web_share"
+                style="@style/Widget.BlazeMuzix.IconButton"
+                android:layout_width="@dimen/touch_target"
+                android:layout_height="@dimen/touch_target"
+                android:contentDescription="@string/action_share"
+                android:src="@drawable/ic_share" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="theme_entries">
+        <item>@string/settings_theme_light</item>
+        <item>@string/settings_theme_dark</item>
+        <item>@string/settings_theme_system</item>
+    </string-array>
+    <string-array name="theme_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>system</item>
+    </string-array>
+
+    <string-array name="repeat_entries">
+        <item>@string/player_repeat_off</item>
+        <item>@string/player_repeat_all</item>
+        <item>@string/player_repeat_one</item>
+    </string-array>
+    <string-array name="repeat_values">
+        <item>off</item>
+        <item>all</item>
+        <item>one</item>
+    </string-array>
+
+    <string-array name="cache_limit_entries">
+        <item>32 MB</item>
+        <item>64 MB</item>
+        <item>150 MB</item>
+        <item>300 MB</item>
+    </string-array>
+    <string-array name="cache_limit_values">
+        <item>32</item>
+        <item>64</item>
+        <item>150</item>
+        <item>300</item>
+    </string-array>
+</resources>

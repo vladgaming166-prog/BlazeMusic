@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.BlazeMuzix.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/bm_primary</item>
+        <item name="colorPrimaryVariant">@color/bm_primary_variant</item>
+        <item name="colorOnPrimary">@color/bm_on_primary</item>
+        <item name="colorSecondary">@color/bm_primary</item>
+        <item name="colorSecondaryVariant">@color/bm_primary_variant</item>
+        <item name="colorOnSecondary">@color/bm_on_primary</item>
+        <item name="colorAccent">@color/bm_primary</item>
+        <item name="colorSurface">@color/bm_surface</item>
+        <item name="colorOnSurface">@color/bm_on_surface</item>
+        <item name="android:colorBackground">@color/bm_background</item>
+        <item name="colorOnBackground">@color/bm_on_surface</item>
+        <item name="colorError">@color/bm_error</item>
+        <item name="colorOnError">@color/bm_on_error</item>
+        <item name="colorControlNormal">@color/bm_on_surface_variant</item>
+        <item name="colorControlActivated">@color/bm_primary</item>
+        <item name="colorControlHighlight">@color/bm_ripple</item>
+        <item name="android:textColorPrimary">@color/bm_on_surface</item>
+        <item name="android:textColorSecondary">@color/bm_on_surface_variant</item>
+        <item name="android:textColorHint">@color/bm_on_surface_disabled</item>
+        <item name="android:windowBackground">@color/bm_background</item>
+        <item name="android:navigationBarColor">@color/bm_background</item>
+        <item name="android:statusBarColor">@color/bm_background</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.BlazeMuzix.Headline</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.BlazeMuzix.Title</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.BlazeMuzix.Subtitle</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.BlazeMuzix.Body</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.BlazeMuzix.Body</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.BlazeMuzix.Caption</item>
+        <item name="textAppearanceButton">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="materialCardViewStyle">@style/Widget.BlazeMuzix.Card</item>
+        <item name="materialButtonStyle">@style/Widget.BlazeMuzix.Button</item>
+        <item name="chipStyle">@style/Widget.BlazeMuzix.Chip</item>
+        <item name="bottomNavigationStyle">@style/Widget.BlazeMuzix.BottomNavigation</item>
+        <item name="toolbarStyle">@style/Widget.BlazeMuzix.Toolbar</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.BlazeMuzix.BottomSheetDialog</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.BlazeMuzix.Dialog</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.BlazeMuzix.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BlazeMuzix.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.BlazeMuzix.Large</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="android:windowAnimationStyle">@style/Animation.BlazeMuzix.Window</item>
+    </style>
+
+    <style name="Theme.BlazeMuzix" parent="Theme.BlazeMuzix.Base" />
+
+    <!-- Full player is always rendered on a dark surface for artwork contrast. -->
+    <style name="Theme.BlazeMuzix.Player" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/blaze_green_bright</item>
+        <item name="colorPrimaryVariant">@color/blaze_green</item>
+        <item name="colorOnPrimary">@color/blaze_black</item>
+        <item name="colorSecondary">@color/blaze_green_bright</item>
+        <item name="colorOnSecondary">@color/blaze_black</item>
+        <item name="colorAccent">@color/blaze_green_bright</item>
+        <item name="colorSurface">#121513</item>
+        <item name="colorOnSurface">#E8EAED</item>
+        <item name="android:colorBackground">@color/bm_player_background</item>
+        <item name="colorOnBackground">#E8EAED</item>
+        <item name="colorControlNormal">#E8EAED</item>
+        <item name="colorControlActivated">@color/blaze_green_bright</item>
+        <item name="colorControlHighlight">#334ADE80</item>
+        <item name="android:textColorPrimary">#E8EAED</item>
+        <item name="android:textColorSecondary">#9AA0A6</item>
+        <item name="android:windowBackground">@color/bm_player_background</item>
+        <item name="android:statusBarColor">@color/bm_player_background</item>
+        <item name="android:navigationBarColor">@color/bm_player_background</item>
+        <item name="materialButtonStyle">@style/Widget.BlazeMuzix.Button</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.BlazeMuzix.BottomSheetDialog.Dark</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.BlazeMuzix.Dialog</item>
+        <item name="android:windowAnimationStyle">@style/Animation.BlazeMuzix.Window</item>
+    </style>
+
+    <!-- Text -->
+    <style name="TextAppearance.BlazeMuzix.Display" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Headline" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Title" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Subtitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Label" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:textSize">@dimen/text_label</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- Shapes -->
+    <style name="ShapeAppearance.BlazeMuzix.Small" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_s</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.Medium" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_m</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.Large" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_l</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.Pill" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.Artwork" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_m</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.ArtworkSmall" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_s</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.Circle" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Widgets -->
+    <style name="Widget.BlazeMuzix.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/bm_surface_variant</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Medium</item>
+        <item name="rippleColor">@color/bm_ripple</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Button" parent="Widget.MaterialComponents.Button">
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="android:paddingLeft">20dp</item>
+        <item name="android:paddingRight">20dp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Button.Tonal" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="backgroundTint">@color/bm_primary_container</item>
+        <item name="android:textColor">@color/bm_on_primary_container</item>
+        <item name="iconTint">@color/bm_on_primary_container</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/bm_outline</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.IconButton" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:minWidth">@dimen/touch_target</item>
+        <item name="android:minHeight">@dimen/touch_target</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="tint">?attr/colorControlNormal</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipMinHeight">36dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BlazeMuzix.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Button</item>
+        <item name="rippleColor">@color/bm_ripple</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.BottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/bm_surface</item>
+        <item name="itemIconTint">@color/nav_item_color</item>
+        <item name="itemTextColor">@color/nav_item_color</item>
+        <item name="itemRippleColor">@color/bm_ripple</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="elevation">0dp</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.BlazeMuzix.NavLabel</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.BlazeMuzix.NavLabel</item>
+    </style>
+
+    <style name="TextAppearance.BlazeMuzix.NavLabel" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">?android:colorBackground</item>
+        <item name="titleTextAppearance">@style/TextAppearance.BlazeMuzix.Title</item>
+        <item name="titleTextColor">?android:textColorPrimary</item>
+        <item name="navigationIconTint">?android:textColorPrimary</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.SourceBadge" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.BlazeMuzix.Label</item>
+        <item name="android:background">@drawable/bg_badge</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:textColor">@color/bm_on_surface_variant</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.Seekbar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:progressDrawable">@drawable/seekbar_progress</item>
+        <item name="android:thumb">@drawable/seekbar_thumb</item>
+        <item name="android:splitTrack">false</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+
+    <style name="ThemeOverlay.BlazeMuzix.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BlazeMuzix.BottomSheet</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="ThemeOverlay.BlazeMuzix.BottomSheetDialog.Dark" parent="ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.BlazeMuzix.BottomSheet.Dark</item>
+        <item name="colorPrimary">@color/blaze_green_bright</item>
+        <item name="colorControlNormal">#E8EAED</item>
+        <item name="colorSurface">#182019</item>
+        <item name="colorOnSurface">#E8EAED</item>
+        <item name="android:textColorPrimary">#E8EAED</item>
+        <item name="android:textColorSecondary">#9AA0A6</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/bm_surface_elevated</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BlazeMuzix.BottomSheet</item>
+    </style>
+
+    <style name="Widget.BlazeMuzix.BottomSheet.Dark" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">#182019</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.BlazeMuzix.BottomSheet</item>
+    </style>
+
+    <style name="ShapeAppearance.BlazeMuzix.BottomSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/corner_xl</item>
+        <item name="cornerSizeTopRight">@dimen/corner_xl</item>
+    </style>
+
+    <style name="ThemeOverlay.BlazeMuzix.Dialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.BlazeMuzix.Large</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.BlazeMuzix.Button.Text</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.BlazeMuzix.Button.Text</item>
+    </style>
+
+    <!-- Short window transitions; fully disabled at runtime in reduced-animation mode. -->
+    <style name="Animation.BlazeMuzix.Window" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/fade_in_short</item>
+        <item name="android:activityOpenExitAnimation">@anim/fade_out_short</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fade_in_short</item>
+        <item name="android:activityCloseExitAnimation">@anim/fade_out_short</item>
+    </style>
+</resources>
