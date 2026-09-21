@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_teal">#5EEAD4</color>
+    <color name="accent_teal_variant">#2DD4BF</color>
+    <color name="accent_teal_container">#12312C</color>
+    <color name="accent_blue">#7FB4FF</color>
+    <color name="accent_blue_variant">#5A9BFF</color>
+    <color name="accent_blue_container">#142338</color>
+    <color name="accent_purple">#C4A5FF</color>
+    <color name="accent_purple_variant">#A981FF</color>
+    <color name="accent_purple_container">#241B3A</color>
+    <color name="accent_orange">#FFB86B</color>
+    <color name="accent_orange_variant">#FFA347</color>
+    <color name="accent_orange_container">#3A2712</color>
+    <color name="accent_red">#FF8A8A</color>
+    <color name="accent_red_variant">#FF6B6B</color>
+    <color name="accent_red_container">#3A1616</color>
+    <color name="accent_on_light">#0B0D0C</color>
+</resources>

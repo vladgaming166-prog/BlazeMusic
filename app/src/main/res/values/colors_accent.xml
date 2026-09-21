@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accent palettes (light). Each has primary / variant / on-primary / soft container. -->
+    <color name="accent_teal">#0F8A7A</color>
+    <color name="accent_teal_variant">#0B5F55</color>
+    <color name="accent_teal_container">#D9F3EF</color>
+    <color name="accent_blue">#1A6FD1</color>
+    <color name="accent_blue_variant">#124E93</color>
+    <color name="accent_blue_container">#DCE9FA</color>
+    <color name="accent_purple">#7C3AED</color>
+    <color name="accent_purple_variant">#5B21B6</color>
+    <color name="accent_purple_container">#EDE4FC</color>
+    <color name="accent_orange">#D9740A</color>
+    <color name="accent_orange_variant">#9A5207</color>
+    <color name="accent_orange_container">#FCEBD9</color>
+    <color name="accent_red">#D63A3A</color>
+    <color name="accent_red_variant">#9B2727</color>
+    <color name="accent_red_container">#FBE0E0</color>
+    <color name="accent_on_light">#FFFFFF</color>
+</resources>
