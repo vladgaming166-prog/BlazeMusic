@@ -30,14 +30,14 @@ val hasReleaseKeystore = releaseKeystorePath.isNotEmpty() && file(releaseKeystor
 
 android {
     namespace = "com.blazemuzix.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.blazemuzix.app"
         // Android 4.4 (KitKat) is the lowest supported version. Every library below
         // has been selected so that it still supports API 19.
         minSdk = 19
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -119,6 +119,8 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // Robolectric needs the real manifest + resources to launch activities on the JVM.
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
@@ -154,4 +156,8 @@ dependencies {
     // Real org.json implementation for JVM unit tests (the Android SDK stubs return null).
     testImplementation("org.json:json:20240303")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    // Launches the real Application + MainActivity on the JVM to catch startup crashes in CI.
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core-ktx:1.6.1")
+    testImplementation("androidx.test.ext:junit:1.2.1")
 }

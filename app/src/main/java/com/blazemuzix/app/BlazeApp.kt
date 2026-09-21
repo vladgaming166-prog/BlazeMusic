@@ -2,6 +2,7 @@ package com.blazemuzix.app
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.multidex.MultiDexApplication
 import com.blazemuzix.app.data.cache.ResponseCache
 import com.blazemuzix.app.data.db.BlazeDatabase
@@ -15,6 +16,8 @@ import com.blazemuzix.app.providers.ProviderRegistry
 import com.blazemuzix.app.providers.SpotifyProvider
 import com.blazemuzix.app.providers.YouTubeProvider
 import com.blazemuzix.app.utils.Artwork
+import com.blazemuzix.app.utils.CrashDiagnostics
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,10 +32,16 @@ class BlazeApp : MultiDexApplication() {
     lateinit var graph: Graph
         private set
 
-    val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** Best-effort background work; a failure here must never take the process down. */
+    val appScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e ->
+            Log.w("BlazeApp", "Background task failed", e)
+        }
+    )
 
     override fun onCreate() {
         super.onCreate()
+        CrashDiagnostics.install(this)
         graph = Graph(this)
         graph.prefs.ensureDefaults()
         graph.prefs.applyTheme()

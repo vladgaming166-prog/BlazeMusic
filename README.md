@@ -4,7 +4,7 @@
 
 - Package: `com.blazemuzix.app`
 - Minimum Android version: **4.4 KitKat (API 19)**
-- Target / compile SDK: **Android 15 (API 35)**
+- Target / compile SDK: **Android 16 (API 36)**
 - Language: Kotlin, traditional Android Views (Material Components)
 - No advertisements, no analytics, no trackers
 
@@ -45,7 +45,7 @@
 
 ## Supported Android versions
 
-BlazeMuzix runs on Android 4.4.2 (API 19) through Android 15 (API 35) and newer.
+BlazeMuzix runs on Android 4.4.2 (API 19) through Android 16 (API 36) and newer.
 
 | Capability | Android 4.4 – 5.x | Android 6 – 7 | Android 8 – 12 | Android 13+ |
 | --- | --- | --- | --- | --- |
@@ -121,7 +121,7 @@ BlazeMuzix/
 
 ## Building locally
 
-Requirements: JDK 17 (or 21) and the Android SDK (platform 35, build-tools 35.0.0). Android Studio is **not** required.
+Requirements: JDK 17 (or 21) and the Android SDK (platform 36, build-tools 35.0.0). Android Studio is **not** required.
 
 ```bash
 git clone https://github.com/vladgaming166-prog/BlazeMusic.git
@@ -140,13 +140,25 @@ Install on a connected device with `adb install -r app/build/outputs/apk/debug/a
 
 Without any credentials the app still builds and runs: local music, the library and the player work fully, and online screens show an honest "provider not configured" state.
 
+### Startup checks and crash diagnostics
+
+- `./gradlew testDebugUnitTest` includes `AppLaunchTest`, which boots the real `BlazeApp` and `MainActivity` under Robolectric on API 21, 33 and 35. A startup crash fails the build (locally and in CI) instead of being discovered on a phone.
+- Debug builds install `CrashDiagnostics`: every uncaught exception is logged under the Logcat tag `BlazeMuzixCrash` and written to `files/crash/last-crash.txt` on the device. Read it with:
+
+```bash
+adb logcat -d -s BlazeMuzixCrash AndroidRuntime
+adb shell run-as com.blazemuzix.app.debug cat files/crash/last-crash.txt
+```
+
+Nothing is uploaded; release builds do not install the handler.
+
 ## GitHub Actions builds
 
 `.github/workflows/build.yml` runs on every push and pull request to `main`, and manually through **Actions → Build BlazeMuzix APK → Run workflow** (`workflow_dispatch`). It:
 
 1. Checks out the repository
 2. Sets up Temurin JDK 17
-3. Installs the Android SDK (`platform-tools`, `platforms;android-35`, `build-tools;35.0.0`)
+3. Installs the Android SDK (`platform-tools`, `platforms;android-36`, `build-tools;35.0.0`)
 4. Accepts all Android SDK licenses
 5. Restores/saves the Gradle cache (`gradle/actions/setup-gradle`)
 6. Runs the unit tests

@@ -46,9 +46,9 @@
             android:textColor="@color/bm_on_warning_container" />
     </LinearLayout>
 
-    <include
-        android:id="@+id/mini_player"
-        layout="@layout/layout_mini_player" />
+    <!-- No android:id here: an id on <include> would replace the included root's
+         @id/mini_player_root, which MainActivity looks up. -->
+    <include layout="@layout/layout_mini_player" />
 
     <View
         android:layout_width="match_parent"
