@@ -33,6 +33,7 @@ class DiscoveryRepository(
     suspend fun home(): HomeResult = coroutineScope {
         val offline = !network.isOnline
         val recent = async { runCatching { library.recentlyPlayed(20) }.getOrDefault(emptyList()) }
+        val favorites = async { runCatching { library.favorites() }.getOrDefault(emptyList()) }
         val local = async { runCatching { providers.local.homeSections() }.getOrDefault(emptyList()) }
         val onlineJobs = if (offline) emptyList() else providers.configuredOnline.map { p ->
             async { runCatching { p.homeSections() } }
@@ -49,9 +50,13 @@ class DiscoveryRepository(
         for (job in onlineJobs) {
             job.await().fold(onSuccess = { onlineSections.addAll(it) }, onFailure = { errors.add(it) })
         }
-        // Interleave so one provider never dominates the top of the page.
+        // Order: recently played, recently added, favorites, albums, artists, then any online sections.
+        localSections.firstOrNull()?.let { sections.add(it) }
+        favorites.await().takeIf { it.isNotEmpty() }?.let {
+            sections.add(Section("favorites", R.string.section_favorites, it.take(20), SectionLayout.CARDS))
+        }
+        sections.addAll(localSections.drop(1))
         sections.addAll(onlineSections)
-        sections.addAll(localSections)
         HomeResult(sections, errors, offline)
     }
 
@@ -86,8 +91,19 @@ class DiscoveryRepository(
                 }
             }
         }
-        val lists = jobs.map { it.await() }
+        val lists = ArrayList(jobs.map { it.await() })
+        if ((type == null || type == MediaType.PLAYLIST) && cursors == null) {
+            lists.add(0, localPlaylistsMatching(query))
+        }
         SearchResult(interleave(lists), active, active.mapNotNull { it.error })
+    }
+
+    private suspend fun localPlaylistsMatching(query: String): List<MediaItem> {
+        val q = query.trim().lowercase()
+        if (q.isEmpty()) return emptyList()
+        return runCatching { library.playlists() }.getOrDefault(emptyList())
+            .filter { it.name.lowercase().contains(q) }
+            .map { with(com.blazemuzix.app.ui.library.LibraryViewModel) { it.toMediaItem() } }
     }
 
     private fun buildCursors(type: MediaType?): List<ProviderCursor> {

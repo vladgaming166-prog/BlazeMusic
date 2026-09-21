@@ -25,6 +25,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         if (!loadedOnce) load()
     }
 
+    fun rescan() {
+        graph.localProvider.invalidate()
+        load(userRefresh = true)
+    }
+
     fun load(userRefresh: Boolean = false) {
         job?.cancel()
         if (userRefresh) refreshing.value = true else if (!loadedOnce) _state.value = UiState.Loading
@@ -34,17 +39,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 loadedOnce = true
                 _state.value = when {
                     result.sections.isNotEmpty() -> UiState.Success(result.sections)
-                    result.offline -> UiState.Offline
-                    result.errors.isNotEmpty() && result.errors.all { it is ApiException.NotConfigured } -> UiState.Empty(
-                        graph.discovery.let { getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_providers_title) },
-                        getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_providers_message)
+                    result.offline && graph.discovery.hasOnlineProviders -> UiState.Offline
+                    result.errors.isNotEmpty() && result.errors.none { it is ApiException.NotConfigured } -> UiState.Error(result.errors.first())
+                    else -> UiState.Empty(
+                        getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_music_title),
+                        getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_music_message)
                     )
-                    result.errors.isNotEmpty() -> UiState.Error(result.errors.first())
-                    !graph.discovery.hasOnlineProviders -> UiState.Empty(
-                        getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_providers_title),
-                        getApplication<Application>().getString(com.blazemuzix.app.R.string.home_no_providers_message)
-                    )
-                    else -> UiState.Empty()
                 }
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e

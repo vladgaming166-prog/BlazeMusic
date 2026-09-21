@@ -63,7 +63,7 @@ class BlazeApp : MultiDexApplication() {
         val localProvider = LocalMusicProvider(context)
         val youtubeProvider = YouTubeProvider(http, BuildConfig.YOUTUBE_API_KEY)
         val spotifyProvider = SpotifyProvider(http, BuildConfig.SPOTIFY_CLIENT_ID, BuildConfig.SPOTIFY_CLIENT_SECRET)
-        val providers = ProviderRegistry(localProvider, youtubeProvider, spotifyProvider)
+        val providers = ProviderRegistry(localProvider, youtubeProvider, spotifyProvider, onlineEnabled = BuildConfig.ONLINE_PROVIDERS)
         val discovery = DiscoveryRepository(providers, library, network)
     }
 

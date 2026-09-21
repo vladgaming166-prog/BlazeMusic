@@ -118,7 +118,6 @@ class SearchFragment : Fragment(R.layout.fragment_search), MediaAdapter.Listener
                 R.id.filter_albums -> SearchFilter.ALBUMS
                 R.id.filter_artists -> SearchFilter.ARTISTS
                 R.id.filter_playlists -> SearchFilter.PLAYLISTS
-                R.id.filter_videos -> SearchFilter.VIDEOS
                 else -> SearchFilter.ALL
             }
             viewModel.setFilter(filter)

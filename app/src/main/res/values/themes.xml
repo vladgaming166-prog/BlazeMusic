@@ -5,6 +5,7 @@
         <item name="colorPrimary">@color/bm_primary</item>
         <item name="colorPrimaryVariant">@color/bm_primary_variant</item>
         <item name="colorOnPrimary">@color/bm_on_primary</item>
+        <item name="bmAccentContainer">@color/bm_primary_container</item>
         <item name="colorSecondary">@color/bm_primary</item>
         <item name="colorSecondaryVariant">@color/bm_primary_variant</item>
         <item name="colorOnSecondary">@color/bm_on_primary</item>
@@ -50,6 +51,7 @@
 
     <!-- Full player is always rendered on a dark surface for artwork contrast. -->
     <style name="Theme.BlazeMuzix.Player" parent="Theme.MaterialComponents.NoActionBar" tools:targetApi="lollipop">
+        <item name="bmAccentContainer">@color/bm_primary_container</item>
         <item name="colorPrimary">@color/blaze_green_bright</item>
         <item name="colorPrimaryVariant">@color/blaze_green</item>
         <item name="colorOnPrimary">@color/blaze_black</item>

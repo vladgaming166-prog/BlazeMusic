@@ -11,6 +11,54 @@
         <item>system</item>
     </string-array>
 
+    <string-array name="accent_entries">
+        <item>@string/accent_green</item>
+        <item>@string/accent_teal</item>
+        <item>@string/accent_blue</item>
+        <item>@string/accent_purple</item>
+        <item>@string/accent_orange</item>
+        <item>@string/accent_red</item>
+    </string-array>
+    <string-array name="accent_values">
+        <item>green</item>
+        <item>teal</item>
+        <item>blue</item>
+        <item>purple</item>
+        <item>orange</item>
+        <item>red</item>
+    </string-array>
+
+    <string-array name="background_style_entries">
+        <item>@string/background_plain</item>
+        <item>@string/background_tinted</item>
+    </string-array>
+    <string-array name="background_style_values">
+        <item>plain</item>
+        <item>tinted</item>
+    </string-array>
+
+    <string-array name="nav_style_entries">
+        <item>@string/nav_style_labeled</item>
+        <item>@string/nav_style_selected</item>
+        <item>@string/nav_style_unlabeled</item>
+    </string-array>
+    <string-array name="nav_style_values">
+        <item>labeled</item>
+        <item>selected</item>
+        <item>unlabeled</item>
+    </string-array>
+
+    <string-array name="bar_style_entries">
+        <item>@string/bar_style_match</item>
+        <item>@string/bar_style_accent</item>
+        <item>@string/bar_style_black</item>
+    </string-array>
+    <string-array name="bar_style_values">
+        <item>match</item>
+        <item>accent</item>
+        <item>black</item>
+    </string-array>
+
     <string-array name="repeat_entries">
         <item>@string/player_repeat_off</item>
         <item>@string/player_repeat_all</item>

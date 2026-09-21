@@ -24,7 +24,7 @@ import com.blazemuzix.app.ui.library.DetailListFragment
 import com.blazemuzix.app.ui.library.LibraryFragment
 import com.blazemuzix.app.ui.player.PlayerActivity
 import com.blazemuzix.app.ui.search.SearchFragment
-import com.blazemuzix.app.ui.shorts.ShortsFragment
+import com.blazemuzix.app.utils.Appearance
 import com.blazemuzix.app.utils.Artwork
 import com.blazemuzix.app.utils.applySystemBarInsets
 import com.blazemuzix.app.utils.dp
@@ -42,11 +42,17 @@ class MainActivity : AppCompatActivity(), Navigator {
     private lateinit var miniPlayPause: ImageButton
     private lateinit var miniProgress: ProgressBar
     private var lastArtworkId: String? = null
+    private var appearanceVersion = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Appearance.apply(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        findViewById<View>(R.id.root).applySystemBarInsets(top = true, bottom = true)
+        val prefs = BlazeApp.graph(this).prefs
+        appearanceVersion = prefs.appearanceVersion
+        val root = findViewById<View>(R.id.root)
+        root.applySystemBarInsets(top = true, bottom = true)
+        Appearance.decorate(this, root)
 
         bottomNav = findViewById(R.id.bottom_nav)
         offlineBanner = findViewById(R.id.offline_banner)
@@ -65,12 +71,16 @@ class MainActivity : AppCompatActivity(), Navigator {
             when (menuItem.itemId) {
                 R.id.nav_home -> showTab(TAG_HOME)
                 R.id.nav_search -> showTab(TAG_SEARCH)
-                R.id.nav_shorts -> showTab(TAG_SHORTS)
                 R.id.nav_library -> showTab(TAG_LIBRARY)
             }
             true
         }
         bottomNav.setOnItemReselectedListener { popDetails() }
+        bottomNav.labelVisibilityMode = when (prefs.navigationStyle) {
+            com.blazemuzix.app.data.prefs.AppPreferences.NAV_SELECTED -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_SELECTED
+            com.blazemuzix.app.data.prefs.AppPreferences.NAV_UNLABELED -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_UNLABELED
+            else -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_LABELED
+        }
 
         findViewById<View>(R.id.mini_player_card).setOnClickListener { openPlayer() }
         miniPlayPause.setOnClickListener { PlayerController.togglePlayPause(this) }
@@ -86,8 +96,13 @@ class MainActivity : AppCompatActivity(), Navigator {
 
     override fun onResume() {
         super.onResume()
+        val prefs = BlazeApp.graph(this).prefs
         // Re-apply theme changes made in Settings without restarting the task.
-        BlazeApp.graph(this).prefs.applyTheme()
+        prefs.applyTheme()
+        if (appearanceVersion != prefs.appearanceVersion) {
+            appearanceVersion = prefs.appearanceVersion
+            recreate()
+        }
     }
 
     // ------------------------------------------------------------- navigation
@@ -99,7 +114,6 @@ class MainActivity : AppCompatActivity(), Navigator {
         if (target == null) {
             target = when (tag) {
                 TAG_SEARCH -> SearchFragment()
-                TAG_SHORTS -> ShortsFragment()
                 TAG_LIBRARY -> LibraryFragment()
                 else -> HomeFragment()
             }
@@ -144,7 +158,7 @@ class MainActivity : AppCompatActivity(), Navigator {
 
     private fun renderMiniPlayer(state: PlayerState) {
         val item = state.current
-        miniRoot.visible(item != null)
+        miniRoot.visible(item != null && BlazeApp.graph(this).prefs.miniPlayerEnabled)
         if (item == null) {
             lastArtworkId = null
             return
@@ -173,10 +187,9 @@ class MainActivity : AppCompatActivity(), Navigator {
     companion object {
         const val TAG_HOME = "home"
         const val TAG_SEARCH = "search"
-        const val TAG_SHORTS = "shorts"
         const val TAG_LIBRARY = "library"
         const val TAG_DETAIL = "detail"
-        private val TABS = setOf(TAG_HOME, TAG_SEARCH, TAG_SHORTS, TAG_LIBRARY)
+        private val TABS = setOf(TAG_HOME, TAG_SEARCH, TAG_LIBRARY)
         private const val REQ_NOTIFICATIONS = 77
     }
 }

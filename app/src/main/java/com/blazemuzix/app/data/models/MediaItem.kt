@@ -73,7 +73,9 @@ data class MediaItem(
     /** Number of tracks for collections, when known. */
     val trackCount: Int = 0,
     /** Local file path for MediaStore items (used to classify Downloads). */
-    val localPath: String? = null
+    val localPath: String? = null,
+    /** Seconds since epoch when the file was added to the device (local items only). */
+    val dateAdded: Long = 0L
 ) {
     val isLocal: Boolean get() = source == Source.LOCAL
 
@@ -102,6 +104,7 @@ data class MediaItem(
         put("previewOnly", previewOnly)
         put("trackCount", trackCount)
         put("localPath", localPath)
+        put("dateAdded", dateAdded)
     }
 
     companion object {
@@ -120,7 +123,8 @@ data class MediaItem(
             playback = Playback.fromId(json.optString("playback")),
             previewOnly = json.optBoolean("previewOnly", false),
             trackCount = json.optInt("trackCount", 0),
-            localPath = json.optStringOrNull("localPath")
+            localPath = json.optStringOrNull("localPath"),
+            dateAdded = json.optLong("dateAdded", 0L)
         )
 
         fun fromJsonOrNull(raw: String?): MediaItem? = try {

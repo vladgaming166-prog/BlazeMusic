@@ -54,6 +54,8 @@ android {
 
         vectorDrawables.useSupportLibrary = true
 
+        // Local-only release: online providers stay in the code base but are not registered.
+        buildConfigField("boolean", "ONLINE_PROVIDERS", "false")
         buildConfigField("String", "YOUTUBE_API_KEY", quoted(secret("YOUTUBE_API_KEY")))
         buildConfigField("String", "SPOTIFY_CLIENT_ID", quoted(secret("SPOTIFY_CLIENT_ID")))
         buildConfigField("String", "SPOTIFY_CLIENT_SECRET", quoted(secret("SPOTIFY_CLIENT_SECRET")))

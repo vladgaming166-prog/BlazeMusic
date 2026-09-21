@@ -4,8 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -16,6 +19,8 @@ import com.blazemuzix.app.data.models.Section
 import com.blazemuzix.app.data.models.UiState
 import com.blazemuzix.app.player.PlayerController
 import com.blazemuzix.app.ui.MainActivity
+import com.blazemuzix.app.ui.common.Navigator
+import com.blazemuzix.app.ui.library.LibraryTab
 import com.blazemuzix.app.ui.common.ItemActions
 import com.blazemuzix.app.ui.common.ItemActionsSheet
 import com.blazemuzix.app.ui.common.StateView
@@ -30,10 +35,20 @@ class HomeFragment : Fragment(R.layout.fragment_home), SectionAdapter.Listener {
     private lateinit var state: StateView
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var list: RecyclerView
+    private lateinit var quick: View
+
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.rescan() else viewModel.load()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val context = requireContext()
+        quick = view.findViewById(R.id.home_quick)
+        view.findViewById<View>(R.id.quick_shuffle).setOnClickListener { shuffleAll() }
+        view.findViewById<View>(R.id.quick_songs).setOnClickListener { openLibrary(LibraryTab.SONGS) }
+        view.findViewById<View>(R.id.quick_albums).setOnClickListener { openLibrary(LibraryTab.ALBUMS) }
+        view.findViewById<View>(R.id.quick_artists).setOnClickListener { openLibrary(LibraryTab.ARTISTS) }
         view.findViewById<TextView>(R.id.home_greeting).text = greeting()
         view.findViewById<View>(R.id.home_settings).setOnClickListener {
             startActivity(Intent(context, SettingsActivity::class.java))
@@ -68,30 +83,55 @@ class HomeFragment : Fragment(R.layout.fragment_home), SectionAdapter.Listener {
         when (uiState) {
             is UiState.Loading -> {
                 list.visible(false)
+                quick.visible(false)
                 state.loading()
             }
             is UiState.Success -> {
                 list.visible(true)
+                quick.visible(true)
                 state.hide()
                 adapter.submitList(uiState.data)
             }
             is UiState.Empty -> {
                 list.visible(false)
+                quick.visible(false)
                 state.empty(
-                    uiState.title ?: getString(R.string.home_empty_title),
-                    uiState.message ?: getString(R.string.home_empty_message),
+                    uiState.title ?: getString(R.string.home_no_music_title),
+                    uiState.message ?: getString(R.string.home_no_music_message),
                     R.drawable.ic_music_note,
-                    getString(R.string.nav_library)
-                ) { (activity as? MainActivity)?.selectTab(R.id.nav_library) }
+                    getString(R.string.action_scan_device)
+                ) { scanDevice() }
             }
             is UiState.Error -> {
                 list.visible(false)
+                quick.visible(false)
                 state.error(uiState.error) { viewModel.load() }
             }
             is UiState.Offline -> {
                 list.visible(false)
+                quick.visible(false)
                 state.offline({ viewModel.load() })
             }
+        }
+    }
+
+    private fun scanDevice() {
+        val local = BlazeApp.graph(requireContext()).localProvider
+        if (local.hasPermission()) viewModel.rescan() else permissionLauncher.launch(local.requiredPermission)
+    }
+
+    private fun openLibrary(tab: LibraryTab) {
+        BlazeApp.graph(requireContext()).prefs.lastLibraryTab = tab.ordinal
+        (activity as? MainActivity)?.selectTab(R.id.nav_library)
+    }
+
+    private fun shuffleAll() {
+        val context = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val songs = BlazeApp.graph(context).localProvider.allSongs()
+            if (songs.isEmpty()) return@launch
+            PlayerController.playQueue(context, songs, songs.indices.random(), shuffle = true)
+            (activity as? Navigator)?.openPlayer()
         }
     }
 

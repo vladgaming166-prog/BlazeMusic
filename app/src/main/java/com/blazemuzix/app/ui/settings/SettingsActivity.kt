@@ -24,13 +24,27 @@ import kotlinx.coroutines.withContext
 
 class SettingsActivity : AppCompatActivity() {
 
+    private var appearanceVersion = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        com.blazemuzix.app.utils.Appearance.apply(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        appearanceVersion = BlazeApp.graph(this).prefs.appearanceVersion
         findViewById<View>(android.R.id.content).applySystemBarInsets(top = true, bottom = true)
+        com.blazemuzix.app.utils.Appearance.decorate(this, findViewById(R.id.settings_container))
         findViewById<Toolbar>(R.id.settings_toolbar).setNavigationOnClickListener { finish() }
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction().replace(R.id.settings_container, SettingsFragment()).commit()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = BlazeApp.graph(this).prefs
+        if (appearanceVersion != prefs.appearanceVersion) {
+            appearanceVersion = prefs.appearanceVersion
+            recreate()
         }
     }
 
@@ -38,13 +52,20 @@ class SettingsActivity : AppCompatActivity() {
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences, rootKey)
+            findPreference<androidx.preference.SwitchPreferenceCompat>(AppPreferences.KEY_DYNAMIC_ACCENT)?.let { pref ->
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                    pref.isEnabled = false
+                    pref.isChecked = false
+                    pref.summary = getString(R.string.settings_dynamic_accent_unavailable)
+                }
+            }
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+                findPreference<Preference>(AppPreferences.KEY_STATUS_BAR)?.apply { isEnabled = false; summary = getString(R.string.settings_bar_style_note) }
+                findPreference<Preference>(AppPreferences.KEY_NAV_BAR)?.apply { isEnabled = false; summary = getString(R.string.settings_bar_style_note) }
+            }
             val graph = BlazeApp.graph(requireContext())
 
             findPreference<Preference>(AppPreferences.KEY_VERSION)?.summary = BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
-            findPreference<Preference>(AppPreferences.KEY_PROVIDER_YOUTUBE)?.summary =
-                if (graph.youtubeProvider.isConfigured) getString(R.string.settings_provider_status_configured) else getString(R.string.settings_provider_status_missing, "YOUTUBE_API_KEY")
-            findPreference<Preference>(AppPreferences.KEY_PROVIDER_SPOTIFY)?.summary =
-                if (graph.spotifyProvider.isConfigured) getString(R.string.settings_provider_status_configured) else getString(R.string.settings_provider_status_missing, "SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET")
 
             findPreference<Preference>(AppPreferences.KEY_CLEAR_CACHE)?.setOnPreferenceClickListener {
                 clearCache()
@@ -83,9 +104,19 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+            val prefs = BlazeApp.graph(requireContext()).prefs
             when (key) {
-                AppPreferences.KEY_THEME -> BlazeApp.graph(requireContext()).prefs.applyTheme()
+                AppPreferences.KEY_THEME -> prefs.applyTheme()
                 AppPreferences.KEY_LOW_END, AppPreferences.KEY_DATA_SAVER -> Artwork.clearMemoryCache(requireContext())
+            }
+            // Visual settings: bump once so Main/Player/Settings recreate with the new look.
+            if (prefs.isAppearanceKey(key)) {
+                prefs.bumpAppearanceVersion()
+                if (key == AppPreferences.KEY_ACCENT || key == AppPreferences.KEY_DYNAMIC_ACCENT || key == AppPreferences.KEY_BACKGROUND_STYLE ||
+                    key == AppPreferences.KEY_STATUS_BAR || key == AppPreferences.KEY_NAV_BAR
+                ) {
+                    activity?.recreate()
+                }
             }
         }
 

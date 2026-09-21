@@ -118,16 +118,46 @@ class LocalMusicProvider(context: Context) : MusicProvider {
     override suspend fun homeSections(): List<Section> {
         val songs = allSongs()
         if (songs.isEmpty()) return emptyList()
-        return listOf(
-            Section("local_recent", R.string.section_local, songs.sortedByDescending { it.providerId.toLongOrNull() ?: 0L }.take(20), SectionLayout.CARDS, Source.LOCAL)
-        )
+        val sections = ArrayList<Section>(3)
+        sections.add(Section("local_added", R.string.section_recently_added, recentlyAdded(songs, 20), SectionLayout.CARDS, Source.LOCAL))
+        albums().takeIf { it.isNotEmpty() }?.let { sections.add(Section("local_albums", R.string.section_albums, it.take(20), SectionLayout.CARDS, Source.LOCAL)) }
+        artists().takeIf { it.isNotEmpty() }?.let { sections.add(Section("local_artists", R.string.section_artists, it.take(20), SectionLayout.CARDS, Source.LOCAL)) }
+        return sections
     }
+
+    fun recentlyAdded(songs: List<MediaItem>, limit: Int): List<MediaItem> =
+        songs.sortedWith(compareByDescending<MediaItem> { it.dateAdded }.thenByDescending { it.providerId.toLongOrNull() ?: 0L }).take(limit)
+
+    /** Distinct parent folders containing music, useful for "browse by folder". */
+    suspend fun folders(): List<MediaItem> = allSongs()
+        .filter { !it.localPath.isNullOrBlank() }
+        .groupBy { it.localPath!!.substringBeforeLast('/') }
+        .map { (path, tracks) ->
+            MediaItem(
+                id = MediaItem.makeId(Source.LOCAL, MediaType.PLAYLIST, "folder:" + path.hashCode()),
+                source = Source.LOCAL,
+                type = MediaType.PLAYLIST,
+                title = path.substringAfterLast('/').ifBlank { path },
+                artist = path,
+                artworkUrl = tracks.first().artworkUrl,
+                providerId = "folder:$path",
+                playback = Playback.DIRECT,
+                trackCount = tracks.size
+            )
+        }
+        .sortedBy { it.title.lowercase() }
 
     override suspend fun collectionItems(item: MediaItem, pageToken: String?): Page<MediaItem> {
         val songs = allSongs()
         val items = when (item.type) {
             MediaType.ALBUM -> songs.filter { it.album.equals(item.title, ignoreCase = true) && it.artist.equals(item.artist, ignoreCase = true) }
             MediaType.ARTIST -> songs.filter { it.artist.equals(item.title, ignoreCase = true) }
+            MediaType.PLAYLIST -> if (item.providerId.startsWith("folder:")) {
+                val folder = item.providerId.removePrefix("folder:")
+                songs.filter { it.localPath?.substringBeforeLast('/') == folder }
+            } else {
+                emptyList()
+            }
             else -> emptyList()
         }
         return Page(items, null)
@@ -144,7 +174,8 @@ class LocalMusicProvider(context: Context) : MusicProvider {
             MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.DATA
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.DATE_ADDED
         )
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DURATION + " > 20000"
         val list = ArrayList<MediaItem>()
@@ -160,6 +191,7 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                 val albumIdIdx = c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
                 val durationIdx = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val dataIdx = c.getColumnIndex(MediaStore.Audio.Media.DATA)
+                val addedIdx = c.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
                 while (c.moveToNext()) {
                     val id = c.getLong(idIdx)
                     val artist = c.getString(artistIdx)?.takeIf { it.isNotBlank() && it != MediaStore.UNKNOWN_STRING } ?: appContext.getString(R.string.unknown_artist)
@@ -179,7 +211,8 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                             playbackUri = contentUri.toString(),
                             providerId = id.toString(),
                             playback = Playback.DIRECT,
-                            localPath = if (dataIdx >= 0) c.getString(dataIdx) else null
+                            localPath = if (dataIdx >= 0) c.getString(dataIdx) else null,
+                            dateAdded = if (addedIdx >= 0) c.getLong(addedIdx) else 0L
                         )
                     )
                 }

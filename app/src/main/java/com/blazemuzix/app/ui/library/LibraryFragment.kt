@@ -5,7 +5,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -17,6 +20,7 @@ import com.blazemuzix.app.R
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.SectionLayout
 import com.blazemuzix.app.data.models.UiState
+import com.blazemuzix.app.data.prefs.AppPreferences
 import com.blazemuzix.app.player.PlayerController
 import com.blazemuzix.app.ui.common.ItemActions
 import com.blazemuzix.app.ui.common.ItemActionsSheet
@@ -44,6 +48,9 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
     private lateinit var shuffle: MaterialButton
     private lateinit var addButton: View
     private lateinit var rescanButton: View
+    private lateinit var filterRow: View
+    private lateinit var filterField: EditText
+    private lateinit var filterClear: View
     private var permanentlyDenied = false
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -68,6 +75,20 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         shuffle = view.findViewById(R.id.library_shuffle)
         addButton = view.findViewById(R.id.library_add)
         rescanButton = view.findViewById(R.id.library_rescan)
+        filterRow = view.findViewById(R.id.library_filter_row)
+        filterField = view.findViewById(R.id.library_filter)
+        filterClear = view.findViewById(R.id.library_filter_clear)
+        filterField.setText(viewModel.filter)
+        filterField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                filterClear.visible(!s.isNullOrEmpty())
+                viewModel.setFilter(s?.toString() ?: "")
+            }
+        })
+        filterClear.setOnClickListener { filterField.setText("") }
+        view.findViewById<View>(R.id.library_sort).setOnClickListener { showSortDialog() }
 
         adapter = MediaAdapter(SectionLayout.ROWS, this).apply { showStorageTags = true }
         list.layoutManager = LinearLayoutManager(context)
@@ -77,12 +98,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         chips.check(chipIdFor(viewModel.tab))
         chips.setOnCheckedStateChangeListener { _, checkedIds ->
             val tab = when (checkedIds.firstOrNull()) {
+                R.id.tab_albums -> LibraryTab.ALBUMS
+                R.id.tab_artists -> LibraryTab.ARTISTS
+                R.id.tab_playlists -> LibraryTab.PLAYLISTS
                 R.id.tab_favorites -> LibraryTab.FAVORITES
                 R.id.tab_recent -> LibraryTab.RECENT
-                R.id.tab_playlists -> LibraryTab.PLAYLISTS
-                R.id.tab_saved -> LibraryTab.SAVED
-                R.id.tab_downloads -> LibraryTab.DOWNLOADS
-                else -> LibraryTab.LOCAL
+                R.id.tab_folders -> LibraryTab.FOLDERS
+                else -> LibraryTab.SONGS
             }
             viewModel.selectTab(tab)
         }
@@ -98,26 +120,59 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         viewModel.load()
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden && viewModel.syncTabFromPrefs()) {
+            view?.findViewById<ChipGroup>(R.id.library_tabs)?.check(chipIdFor(viewModel.tab))
+        }
+    }
+
     private fun chipIdFor(tab: LibraryTab) = when (tab) {
-        LibraryTab.LOCAL -> R.id.tab_local
+        LibraryTab.SONGS -> R.id.tab_songs
+        LibraryTab.ALBUMS -> R.id.tab_albums
+        LibraryTab.ARTISTS -> R.id.tab_artists
+        LibraryTab.PLAYLISTS -> R.id.tab_playlists
         LibraryTab.FAVORITES -> R.id.tab_favorites
         LibraryTab.RECENT -> R.id.tab_recent
-        LibraryTab.PLAYLISTS -> R.id.tab_playlists
-        LibraryTab.SAVED -> R.id.tab_saved
-        LibraryTab.DOWNLOADS -> R.id.tab_downloads
+        LibraryTab.FOLDERS -> R.id.tab_folders
+    }
+
+    private fun showSortDialog() {
+        val values = arrayOf(
+            AppPreferences.SORT_TITLE, AppPreferences.SORT_ARTIST, AppPreferences.SORT_ALBUM,
+            AppPreferences.SORT_RECENTLY_ADDED, AppPreferences.SORT_RECENTLY_PLAYED, AppPreferences.SORT_DURATION
+        )
+        val labels = arrayOf(
+            getString(R.string.sort_title), getString(R.string.sort_artist), getString(R.string.sort_album),
+            getString(R.string.sort_recently_added), getString(R.string.sort_recently_played), getString(R.string.sort_duration)
+        )
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.library_sort)
+            .setSingleChoiceItems(labels, values.indexOf(viewModel.sort).coerceAtLeast(0)) { dialog, which ->
+                val chosen = values[which]
+                if (chosen == AppPreferences.SORT_RECENTLY_PLAYED) {
+                    viewModel.refreshRecentOrder { viewModel.setSort(chosen) }
+                } else {
+                    viewModel.setSort(chosen)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
     }
 
     private fun render(uiState: UiState<List<MediaItem>>) {
         val tab = viewModel.tab
         val local = BlazeApp.graph(requireContext()).localProvider
-        val isLocalTab = tab == LibraryTab.LOCAL || tab == LibraryTab.DOWNLOADS
+        val isLocalTab = tab == LibraryTab.SONGS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS || tab == LibraryTab.FOLDERS
         addButton.visible(tab == LibraryTab.PLAYLISTS)
         rescanButton.visible(isLocalTab)
-        notice.visible(tab == LibraryTab.DOWNLOADS)
+        notice.visible(false)
 
         if (isLocalTab && !local.hasPermission()) {
             list.visible(false)
             toolbar.visible(false)
+            filterRow.visible(false)
             adapter.submitList(emptyList())
             state.show(
                 R.drawable.ic_lock,
@@ -131,17 +186,20 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         when (uiState) {
             is UiState.Loading -> {
                 toolbar.visible(false)
+                filterRow.visible(false)
                 list.visible(false)
                 state.loading(if (isLocalTab) getString(R.string.scanning_local) else null)
             }
             is UiState.Success -> {
                 state.hide()
                 list.visible(true)
+                filterRow.visible(true)
                 val items = uiState.data
                 adapter.submitItems(items)
                 val playable = items.count { it.canPlayDirect && !it.type.isCollection }
                 toolbar.visible(true)
-                count.text = if (tab == LibraryTab.PLAYLISTS) resources.getString(R.string.items_count, items.size) else resources.getString(R.string.playlist_track_count, items.size)
+                val collections = tab == LibraryTab.PLAYLISTS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS || tab == LibraryTab.FOLDERS
+                count.text = if (collections) resources.getString(R.string.items_count, items.size) else resources.getString(R.string.playlist_track_count, items.size)
                 playAll.visible(playable > 0)
                 shuffle.visible(playable > 1)
             }
@@ -149,16 +207,24 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                 toolbar.visible(false)
                 list.visible(false)
                 adapter.submitList(emptyList())
+                if (viewModel.filter.isNotEmpty() && viewModel.unfilteredCount > 0) {
+                    // The list has content; only the filter hides it.
+                    filterRow.visible(true)
+                    state.empty(getString(R.string.library_filter_empty), "", R.drawable.ic_search, getString(R.string.action_clear)) { filterField.setText("") }
+                    return
+                }
+                filterRow.visible(false)
                 val (title, message, icon) = when (tab) {
-                    LibraryTab.LOCAL -> Triple(R.string.library_local_empty_title, R.string.library_local_empty_message, R.drawable.ic_phone)
+                    LibraryTab.SONGS -> Triple(R.string.library_local_empty_title, R.string.library_local_empty_message, R.drawable.ic_phone)
+                    LibraryTab.ALBUMS -> Triple(R.string.library_albums_empty_title, R.string.library_albums_empty_message, R.drawable.ic_album)
+                    LibraryTab.ARTISTS -> Triple(R.string.library_artists_empty_title, R.string.library_artists_empty_message, R.drawable.ic_person)
                     LibraryTab.FAVORITES -> Triple(R.string.library_favorites_empty_title, R.string.library_favorites_empty_message, R.drawable.ic_favorite_border)
                     LibraryTab.RECENT -> Triple(R.string.library_recent_empty_title, R.string.library_recent_empty_message, R.drawable.ic_history)
                     LibraryTab.PLAYLISTS -> Triple(R.string.library_playlists_empty_title, R.string.library_playlists_empty_message, R.drawable.ic_playlist_play)
-                    LibraryTab.SAVED -> Triple(R.string.library_saved_empty_title, R.string.library_saved_empty_message, R.drawable.ic_bookmark_border)
-                    LibraryTab.DOWNLOADS -> Triple(R.string.library_downloads_empty_title, R.string.library_downloads_empty_message, R.drawable.ic_download)
+                    LibraryTab.FOLDERS -> Triple(R.string.library_folders_empty_title, R.string.library_folders_empty_message, R.drawable.ic_folder)
                 }
                 val action = when (tab) {
-                    LibraryTab.LOCAL, LibraryTab.DOWNLOADS -> getString(R.string.action_rescan)
+                    LibraryTab.SONGS, LibraryTab.ALBUMS, LibraryTab.ARTISTS, LibraryTab.FOLDERS -> getString(R.string.action_rescan)
                     LibraryTab.PLAYLISTS -> getString(R.string.action_new_playlist)
                     else -> null
                 }
@@ -171,11 +237,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
             }
             is UiState.Error -> {
                 toolbar.visible(false)
+                filterRow.visible(false)
                 list.visible(false)
                 state.error(uiState.error) { viewModel.load() }
             }
             is UiState.Offline -> {
                 toolbar.visible(false)
+                filterRow.visible(false)
                 list.visible(false)
                 state.offline({ viewModel.load() })
             }

@@ -58,12 +58,32 @@
             app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/tab_local"
+                android:id="@+id/tab_songs"
                 style="@style/Widget.BlazeMuzix.Chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/library_local" />
+                android:text="@string/library_songs" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tab_albums"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/library_albums" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tab_artists"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/library_artists" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tab_playlists"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/library_playlists" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/tab_favorites"
@@ -80,27 +100,77 @@
                 android:text="@string/library_recent" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/tab_playlists"
+                android:id="@+id/tab_folders"
                 style="@style/Widget.BlazeMuzix.Chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/library_playlists" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/tab_saved"
-                style="@style/Widget.BlazeMuzix.Chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/library_saved" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/tab_downloads"
-                style="@style/Widget.BlazeMuzix.Chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/library_downloads" />
+                android:text="@string/library_folders" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
+
+    <!-- Instant filter of the current list + sort menu. -->
+    <LinearLayout
+        android:id="@+id/library_filter_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_l"
+        android:layout_marginTop="@dimen/space_m"
+        android:layout_marginRight="@dimen/space_l"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_search_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/space_m"
+            android:paddingRight="@dimen/space_s">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_search"
+                app:tint="?android:attr/textColorSecondary" />
+
+            <EditText
+                android:id="@+id/library_filter"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="@string/library_filter_hint"
+                android:imeOptions="actionSearch|flagNoExtractUi"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingLeft="@dimen/space_s"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+                android:textColorHint="?android:attr/textColorHint" />
+
+            <ImageButton
+                android:id="@+id/library_filter_clear"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_clear"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_close"
+                app:tint="?android:attr/textColorSecondary" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/library_sort"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginLeft="@dimen/space_s"
+            android:contentDescription="@string/library_sort"
+            app:srcCompat="@drawable/ic_sort" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/library_toolbar"

@@ -16,6 +16,7 @@
     android:paddingBottom="@dimen/space_s">
 
     <FrameLayout
+        android:id="@+id/row_artwork_frame"
         android:layout_width="@dimen/artwork_row"
         android:layout_height="@dimen/artwork_row">
 

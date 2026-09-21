@@ -132,6 +132,12 @@
         android:textColor="@color/blaze_green_bright"
         android:visibility="gone" />
 
+    <LinearLayout
+        android:id="@+id/player_seek_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <SeekBar
         android:id="@+id/player_seek"
         style="@style/Widget.BlazeMuzix.Seekbar"
@@ -166,6 +172,7 @@
             android:text="@string/default_time"
             android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
             android:textColor="@color/white_70" />
+    </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

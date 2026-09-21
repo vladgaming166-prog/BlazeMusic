@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Soft accent container colour (badges, chips, icon circles); follows the chosen accent. -->
+    <attr name="bmAccentContainer" format="color" />
+</resources>

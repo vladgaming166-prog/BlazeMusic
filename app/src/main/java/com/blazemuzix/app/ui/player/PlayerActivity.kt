@@ -1,6 +1,11 @@
 package com.blazemuzix.app.ui.player
 
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.ViewGroup
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -18,7 +23,13 @@ import com.blazemuzix.app.player.PlayerController
 import com.blazemuzix.app.player.PlayerState
 import com.blazemuzix.app.player.RepeatMode
 import com.blazemuzix.app.ui.common.ItemActionsSheet
+import com.blazemuzix.app.utils.Appearance
 import com.blazemuzix.app.utils.Artwork
+import com.blazemuzix.app.utils.dp
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import androidx.core.graphics.ColorUtils
 import com.blazemuzix.app.utils.Formatters
 import com.blazemuzix.app.utils.applySystemBarInsets
 import com.blazemuzix.app.utils.toast
@@ -45,11 +56,19 @@ class PlayerActivity : AppCompatActivity() {
     private var userSeeking = false
     private var lastArtworkId: String? = null
     private var lastError: String? = null
+    private var lastBackgroundId: String? = null
+    private lateinit var root: View
+    private var appearanceVersion = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Appearance.apply(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
-        findViewById<View>(R.id.player_root).applySystemBarInsets(top = true, bottom = true)
+        val prefs = BlazeApp.graph(this).prefs
+        appearanceVersion = prefs.appearanceVersion
+        root = findViewById(R.id.player_root)
+        root.applySystemBarInsets(top = true, bottom = true)
+        Appearance.decorate(this, root)
 
         artwork = findViewById(R.id.player_artwork)
         title = findViewById(R.id.player_title)
@@ -78,6 +97,17 @@ class PlayerActivity : AppCompatActivity() {
         favorite.setOnClickListener { toggleFavorite() }
         queueButton.setOnClickListener { QueueSheet().show(supportFragmentManager, "queue") }
 
+        // Player customisation: every switch here maps to a real view.
+        queueButton.visible(prefs.playerShowQueue)
+        shuffle.visible(prefs.playerShowShuffle)
+        repeat.visible(prefs.playerShowRepeat)
+        favorite.visible(prefs.playerShowFavorite)
+        findViewById<View>(R.id.player_seek_group).visible(prefs.playerShowSeekBar)
+        if (!prefs.playerLargeArtwork) {
+            val compact = dp(220)
+            artwork.layoutParams = (artwork.layoutParams as ViewGroup.MarginLayoutParams).apply { width = compact; height = compact }
+        }
+
         seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) position.text = Formatters.position(progressToMs(progress))
@@ -103,6 +133,59 @@ class PlayerActivity : AppCompatActivity() {
         BlazeApp.graph(this).library.changes.observe(this) { renderFavorite(PlayerController.current.current) }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val prefs = BlazeApp.graph(this).prefs
+        if (appearanceVersion != prefs.appearanceVersion) {
+            appearanceVersion = prefs.appearanceVersion
+            recreate()
+        }
+    }
+
+    /**
+     * Tints the player background with the artwork's average colour: a 16x16
+     * decode and one gradient drawable, cheap enough for Android 4.4 and
+     * disabled automatically in reduced-effects / low-end mode.
+     */
+    private fun updateBackground(item: MediaItem) {
+        val prefs = BlazeApp.graph(this).prefs
+        if (!prefs.playerArtworkBackground || item.artworkUrl.isNullOrEmpty()) {
+            if (lastBackgroundId != null) { lastBackgroundId = null; Appearance.decorate(this, root) }
+            return
+        }
+        if (lastBackgroundId == item.id) return
+        lastBackgroundId = item.id
+        val base = Appearance.color(this, android.R.attr.colorBackground)
+        Glide.with(this).asBitmap().load(android.net.Uri.parse(item.artworkUrl)).override(16, 16).centerCrop()
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    if (isFinishing || lastBackgroundId != item.id) return
+                    val avg = averageColor(resource)
+                    val tint = ColorUtils.blendARGB(base, avg, 0.35f)
+                    root.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(tint, base, base))
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) = Unit
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    if (!isFinishing) Appearance.decorate(this@PlayerActivity, root)
+                }
+            })
+    }
+
+    private fun averageColor(bitmap: Bitmap): Int {
+        var r = 0L; var g = 0L; var b = 0L; var n = 0L
+        val w = bitmap.width; val h = bitmap.height
+        val pixels = IntArray(w * h)
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+        for (p in pixels) {
+            if (Color.alpha(p) < 128) continue
+            r += Color.red(p); g += Color.green(p); b += Color.blue(p); n++
+        }
+        if (n == 0L) return Color.GRAY
+        return Color.rgb((r / n).toInt(), (g / n).toInt(), (b / n).toInt())
+    }
+
     private fun progressToMs(progress: Int): Long {
         val total = PlayerController.current.durationMs
         return if (total > 0) progress * total / 1000 else 0L
@@ -119,6 +202,8 @@ class PlayerActivity : AppCompatActivity() {
             duration.text = getString(R.string.default_time)
             seek.progress = 0
             lastArtworkId = null
+            lastBackgroundId = null
+            Appearance.decorate(this, root)
             Artwork.load(artwork, null as MediaItem?, artworkSize(), resources.getDimensionPixelSize(R.dimen.corner_l))
             return
         }
@@ -152,6 +237,7 @@ class PlayerActivity : AppCompatActivity() {
         if (lastArtworkId != item.id) {
             lastArtworkId = item.id
             Artwork.load(artwork, item, artworkSize(), resources.getDimensionPixelSize(R.dimen.corner_l))
+            updateBackground(item)
         }
         if (state.error != null && state.error != lastError) {
             lastError = state.error

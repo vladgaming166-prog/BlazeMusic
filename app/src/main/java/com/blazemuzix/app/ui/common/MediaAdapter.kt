@@ -1,5 +1,6 @@
 package com.blazemuzix.app.ui.common
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.blazemuzix.app.BlazeApp
 import com.blazemuzix.app.R
 import com.blazemuzix.app.data.models.MediaItem
 import com.blazemuzix.app.data.models.MediaType
@@ -23,6 +25,37 @@ import com.blazemuzix.app.utils.dp
 import com.blazemuzix.app.utils.label
 import com.blazemuzix.app.utils.visible
 import com.google.android.material.button.MaterialButton
+
+/**
+ * Snapshot of the user's list-appearance settings, read once per adapter so
+ * binding rows never touches SharedPreferences.
+ */
+data class DisplayOptions(
+    val compact: Boolean,
+    val showArtwork: Boolean,
+    val showArtist: Boolean,
+    val showAlbum: Boolean,
+    val showDuration: Boolean,
+    val showBadge: Boolean,
+    val artworkRadiusDp: Int,
+    val cardRadiusDp: Int
+) {
+    companion object {
+        fun from(context: Context): DisplayOptions {
+            val p = BlazeApp.graph(context).prefs
+            return DisplayOptions(
+                compact = p.compactMode,
+                showArtwork = p.showArtwork,
+                showArtist = p.showArtist,
+                showAlbum = p.showAlbum,
+                showDuration = p.showDuration,
+                showBadge = p.showSourceBadge,
+                artworkRadiusDp = p.artworkRadiusDp,
+                cardRadiusDp = p.cornerRadiusDp
+            )
+        }
+    }
+}
 
 /** Entries a media list can contain. */
 sealed class ListEntry {
@@ -70,6 +103,10 @@ class MediaAdapter(
     /** When true, rows show LOCAL / DOWNLOADED / SAVED / ONLINE storage tags. */
     var showStorageTags: Boolean = false
 
+    private var options: DisplayOptions? = null
+
+    private fun options(context: Context): DisplayOptions = options ?: DisplayOptions.from(context).also { options = it }
+
     fun submitItems(items: List<MediaItem>) = submitList(ListEntry.of(items))
 
     fun mediaItems(): List<MediaItem> = currentList.mapNotNull { (it as? ListEntry.Media)?.item }
@@ -100,8 +137,8 @@ class MediaAdapter(
             is ListEntry.Header -> (holder as HeaderHolder).bind(entry)
             is ListEntry.LoadMore -> (holder as LoadMoreHolder).bind(entry)
             is ListEntry.Media -> when (holder) {
-                is RowHolder -> holder.bind(entry.item, entry.item.id == nowPlayingId, showStorageTags)
-                is CardHolder -> holder.bind(entry.item)
+                is RowHolder -> holder.bind(entry.item, entry.item.id == nowPlayingId, showStorageTags, options(holder.itemView.context))
+                is CardHolder -> holder.bind(entry.item, options(holder.itemView.context))
             }
         }
     }
@@ -146,6 +183,7 @@ class MediaAdapter(
 
     class RowHolder(view: View, private val listener: Listener) : RecyclerView.ViewHolder(view) {
         val artwork: ImageView = view.findViewById(R.id.row_artwork)
+        private val artworkFrame: View = view.findViewById(R.id.row_artwork_frame)
         private val playing: ImageView = view.findViewById(R.id.row_playing_indicator)
         private val title: TextView = view.findViewById(R.id.row_title)
         private val subtitle: TextView = view.findViewById(R.id.row_subtitle)
@@ -160,16 +198,25 @@ class MediaAdapter(
             more.setOnClickListener { item?.let { listener.onItemMore(it) } }
         }
 
-        fun bind(item: MediaItem, isPlaying: Boolean, showStorageTags: Boolean) {
+        fun bind(item: MediaItem, isPlaying: Boolean, showStorageTags: Boolean, options: DisplayOptions) {
             this.item = item
             val context = itemView.context
             title.text = item.title
-            subtitle.text = subtitleFor(item)
+            val sub = subtitleFor(item, options)
+            subtitle.text = sub
+            subtitle.visible(sub.isNotEmpty())
             source.text = item.source.label
+            source.visible(options.showBadge)
             duration.text = if (item.durationMs > 0) Formatters.duration(item.durationMs) else ""
-            duration.visible(item.durationMs > 0)
+            duration.visible(options.showDuration && item.durationMs > 0)
+            val artSize = itemView.dp(if (options.compact) 44 else 56)
+            artworkFrame.visible(options.showArtwork)
+            if (artworkFrame.layoutParams.width != artSize) {
+                artworkFrame.layoutParams = artworkFrame.layoutParams.apply { width = artSize; height = artSize }
+            }
+            itemView.minimumHeight = itemView.dp(if (options.compact) 56 else 72)
             val tagText = when {
-                showStorageTags -> when (item.storageTag) {
+                showStorageTags && options.showBadge -> when (item.storageTag) {
                     StorageTag.LOCAL -> context.getString(R.string.tag_local)
                     StorageTag.DOWNLOADED -> context.getString(R.string.tag_downloaded)
                     StorageTag.SAVED -> context.getString(R.string.tag_saved)
@@ -181,7 +228,7 @@ class MediaAdapter(
             }
             tag.visible(tagText != null)
             tag.text = tagText
-            Artwork.load(artwork, item, itemView.dp(56), itemView.dp(8))
+            if (options.showArtwork) Artwork.load(artwork, item, artSize, itemView.dp(options.artworkRadiusDp)) else Artwork.clear(artwork)
             artwork.contentDescription = context.getString(R.string.cd_artwork, item.title)
             setPlaying(isPlaying)
             itemView.contentDescription = "${item.title}, ${item.artist}, ${item.source.label}"
@@ -189,11 +236,14 @@ class MediaAdapter(
 
         fun setPlaying(isPlaying: Boolean) = playing.visible(isPlaying)
 
-        private fun subtitleFor(item: MediaItem): String {
+        private fun subtitleFor(item: MediaItem, options: DisplayOptions): String {
             val context = itemView.context
             val type = item.type.label(context)
             return when (item.type) {
-                MediaType.SONG, MediaType.VIDEO, MediaType.SHORT -> item.artist
+                MediaType.SONG, MediaType.VIDEO, MediaType.SHORT -> listOfNotNull(
+                    item.artist.takeIf { options.showArtist },
+                    item.album?.takeIf { options.showAlbum && it.isNotBlank() }
+                ).joinToString(" · ")
                 MediaType.ALBUM -> if (item.trackCount > 0) "$type · ${item.artist} · ${item.trackCount}" else "$type · ${item.artist}"
                 MediaType.ARTIST -> "$type · ${item.artist}"
                 MediaType.PLAYLIST -> if (item.trackCount > 0) "$type · ${item.artist} · ${context.getString(R.string.playlist_track_count, item.trackCount)}" else "$type · ${item.artist}"
@@ -213,14 +263,19 @@ class MediaAdapter(
             view.setOnLongClickListener { item?.let { listener.onItemMore(it) }; true }
         }
 
-        fun bind(item: MediaItem) {
+        fun bind(item: MediaItem, options: DisplayOptions) {
             this.item = item
             title.text = item.title
-            subtitle.text = when (item.type) {
+            val base = when (item.type) {
                 MediaType.ARTIST -> itemView.context.getString(R.string.type_artist)
                 MediaType.ALBUM, MediaType.PLAYLIST -> "${item.type.label(itemView.context)} · ${item.artist}"
-                else -> item.artist
-            } + " · " + item.source.label
+                else -> listOfNotNull(
+                    item.artist.takeIf { options.showArtist },
+                    item.album?.takeIf { options.showAlbum && it.isNotBlank() }
+                ).joinToString(" · ")
+            }
+            subtitle.text = if (options.showBadge) listOf(base, item.source.label).filter { it.isNotEmpty() }.joinToString(" · ") else base
+            subtitle.visible(subtitle.text.isNotEmpty())
             val badgeText = when {
                 item.durationMs > 0 && (item.type == MediaType.VIDEO || item.type == MediaType.SHORT) -> Formatters.duration(item.durationMs)
                 item.previewOnly -> itemView.context.getString(R.string.tag_preview)
@@ -228,8 +283,12 @@ class MediaAdapter(
             }
             badge.visible(badgeText != null)
             badge.text = badgeText
-            val size = if (wide) itemView.dp(220) else itemView.dp(148)
-            Artwork.load(artwork, item, size, itemView.dp(12))
+            val size = if (wide) itemView.dp(220) else itemView.dp(if (options.compact) 124 else 148)
+            if (!wide && artwork.layoutParams.width != size) {
+                (artwork.parent as? View)?.let { frame -> frame.layoutParams = frame.layoutParams.apply { width = size; height = size } }
+                itemView.layoutParams = itemView.layoutParams.apply { width = size }
+            }
+            Artwork.load(artwork, item, size, itemView.dp(options.cardRadiusDp))
             artwork.contentDescription = itemView.context.getString(R.string.cd_artwork, item.title)
             itemView.contentDescription = "${item.title}, ${item.artist}, ${item.source.label}"
         }
