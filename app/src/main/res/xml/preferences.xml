@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/settings_category_appearance"
+        app:iconSpaceReserved="false">
+
+        <ListPreference
+            android:defaultValue="system"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:key="pref_theme"
+            android:title="@string/settings_theme"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="green"
+            android:entries="@array/accent_entries"
+            android:entryValues="@array/accent_values"
+            android:key="pref_accent"
+            android:title="@string/settings_accent"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_dynamic_accent"
+            android:summary="@string/settings_dynamic_accent_summary"
+            android:title="@string/settings_dynamic_accent"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_rounded_ui"
+            android:summary="@string/settings_rounded_ui_summary"
+            android:title="@string/settings_rounded_ui"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_compact_mode"
+            android:summary="@string/settings_compact_mode_summary"
+            android:title="@string/settings_compact_mode"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_show_artwork"
+            android:title="@string/settings_show_artwork"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_show_artist"
+            android:title="@string/settings_show_artist"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_show_album"
+            android:title="@string/settings_show_album"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_show_duration"
+            android:title="@string/settings_show_duration"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_show_badge"
+            android:summary="@string/settings_show_badge_summary"
+            android:title="@string/settings_show_badge"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_mini_player"
+            android:summary="@string/settings_mini_player_summary"
+            android:title="@string/settings_mini_player"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:defaultValue="plain"
+            android:entries="@array/background_style_entries"
+            android:entryValues="@array/background_style_values"
+            android:key="pref_background_style"
+            android:title="@string/settings_background_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="labeled"
+            android:entries="@array/nav_style_entries"
+            android:entryValues="@array/nav_style_values"
+            android:key="pref_nav_style"
+            android:title="@string/settings_nav_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="match"
+            android:entries="@array/bar_style_entries"
+            android:entryValues="@array/bar_style_values"
+            android:key="pref_status_bar_style"
+            android:title="@string/settings_status_bar_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="match"
+            android:entries="@array/bar_style_entries"
+            android:entryValues="@array/bar_style_values"
+            android:key="pref_nav_bar_style"
+            android:title="@string/settings_nav_bar_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_player"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_large_artwork"
+            android:summary="@string/settings_player_large_artwork_summary"
+            android:title="@string/settings_player_large_artwork"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_artwork_background"
+            android:summary="@string/settings_player_art_background_summary"
+            android:title="@string/settings_player_art_background"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_show_seekbar"
+            android:title="@string/settings_player_show_seekbar"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_show_queue"
+            android:title="@string/settings_player_show_queue"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_show_shuffle"
+            android:title="@string/settings_player_show_shuffle"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_show_repeat"
+            android:title="@string/settings_player_show_repeat"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_player_show_favorite"
+            android:title="@string/settings_player_show_favorite"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_playback"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:key="pref_autoplay"
+            android:summary="@string/settings_autoplay_summary"
+            android:title="@string/settings_autoplay"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_shuffle"
+            android:title="@string/settings_shuffle"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:defaultValue="off"
+            android:entries="@array/repeat_entries"
+            android:entryValues="@array/repeat_values"
+            android:key="pref_repeat"
+            android:title="@string/settings_repeat"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_performance"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="pref_reduced_animations"
+            android:summary="@string/settings_reduced_animations_summary"
+            android:title="@string/settings_reduced_animations"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_low_end_mode"
+            android:summary="@string/settings_performance_mode_summary"
+            android:title="@string/settings_performance_mode"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_data_saver"
+            android:summary="@string/settings_data_saver_summary"
+            android:title="@string/settings_data_saver"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_storage"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="pref_cache_size"
+            android:selectable="false"
+            android:title="@string/settings_cache_size"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference
+            android:entries="@array/cache_limit_entries"
+            android:entryValues="@array/cache_limit_values"
+            android:key="pref_cache_limit"
+            android:title="@string/settings_cache_limit"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            android:key="pref_clear_cache"
+            android:summary="@string/settings_clear_cache_summary"
+            android:title="@string/settings_clear_cache"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_storage_info"
+            android:selectable="false"
+            android:title="@string/settings_storage_info"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_accounts"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_account"
+            android:title="@string/settings_account"
+            android:summary="@string/auth_sign_in"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_privacy"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_privacy"
+            android:title="@string/settings_public_profile"
+            android:summary="@string/settings_public_profile_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_providers"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_provider_youtube"
+            android:title="@string/provider_youtube"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_spotify"
+            android:title="@string/provider_spotify"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_cloud"
+            android:title="@string/provider_cloud"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_local"
+            android:title="@string/provider_local"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_library"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            android:defaultValue="list"
+            android:entries="@array/library_style_entries"
+            android:entryValues="@array/library_style_values"
+            android:key="pref_library_style"
+            android:title="@string/settings_library_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_downloads"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_downloads_policy"
+            android:selectable="false"
+            android:title="@string/settings_downloads_policy"
+            android:summary="@string/settings_downloads_policy_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_notifications"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_notifications_playback"
+            android:summary="@string/settings_notifications_playback_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_audio"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_audio_focus"
+            android:summary="@string/settings_audio_focus_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_accessibility"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_large_text"
+            android:summary="@string/settings_large_text_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_other"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="pref_about"
+            android:summary="@string/settings_about_summary"
+            android:title="@string/settings_about"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_privacy"
+            android:selectable="false"
+            android:summary="@string/settings_privacy_summary"
+            android:title="@string/settings_privacy"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_version"
+            android:selectable="false"
+            android:title="@string/settings_version"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            android:key="pref_licenses"
+            android:title="@string/settings_licenses"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

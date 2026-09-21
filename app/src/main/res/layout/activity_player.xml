@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/player_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bm_player_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_xs"
+        android:paddingTop="@dimen/space_xs"
+        android:paddingRight="@dimen/space_xs">
+
+        <ImageButton
+            android:id="@+id/player_collapse"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/action_collapse"
+            app:srcCompat="@drawable/ic_expand_more"
+            app:tint="@color/white" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_now_playing"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Label"
+                android:textColor="@color/white_70" />
+
+            <TextView
+                android:id="@+id/player_source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+                android:textColor="@color/blaze_green_bright" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/player_more"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/action_more_options"
+            app:srcCompat="@drawable/ic_more_vert"
+            app:tint="@color/white" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="@dimen/space_xl">
+
+        <ImageView
+            android:id="@+id/player_artwork"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/player_artwork"
+            android:maxWidth="@dimen/artwork_full_max"
+            android:maxHeight="@dimen/artwork_full_max"
+            android:scaleType="centerCrop" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_xl"
+        android:paddingRight="@dimen/space_l">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/player_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Headline"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/player_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+                android:textColor="@color/white_70" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/player_favorite"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/action_favorite"
+            app:srcCompat="@drawable/ic_favorite_border"
+            app:tint="@color/white" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/player_preview_notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s"
+        android:paddingLeft="@dimen/space_xl"
+        android:paddingRight="@dimen/space_xl"
+        android:text="@string/preview_only_notice"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+        android:textColor="@color/blaze_green_bright"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/player_seek_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <SeekBar
+        android:id="@+id/player_seek"
+        style="@style/Widget.BlazeMuzix.Seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_l"
+        android:layout_marginTop="@dimen/space_l"
+        android:layout_marginRight="@dimen/space_l"
+        android:contentDescription="@string/player_progress"
+        android:max="1000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_xl"
+        android:paddingRight="@dimen/space_xl">
+
+        <TextView
+            android:id="@+id/player_position"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/default_time"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+            android:textColor="@color/white_70" />
+
+        <TextView
+            android:id="@+id/player_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/default_time"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+            android:textColor="@color/white_70" />
+    </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_xl"
+        android:paddingRight="@dimen/space_xl">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/player_volume"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+            android:textColor="@color/white_70" />
+
+        <SeekBar
+            android:id="@+id/player_volume"
+            style="@style/Widget.BlazeMuzix.Seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/player_volume" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_l"
+        android:paddingRight="@dimen/space_l">
+
+        <ImageButton
+            android:id="@+id/player_shuffle"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_weight="1"
+            android:contentDescription="@string/action_shuffle"
+            app:srcCompat="@drawable/ic_shuffle"
+            app:tint="@color/white_70" />
+
+        <ImageButton
+            android:id="@+id/player_previous"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/action_previous"
+            app:srcCompat="@drawable/ic_skip_previous"
+            app:tint="@color/white" />
+
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp">
+
+            <ImageButton
+                android:id="@+id/player_play_pause"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_circle_primary"
+                android:contentDescription="@string/cd_play_pause"
+                android:padding="20dp"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_play"
+                app:tint="@color/blaze_black" />
+
+            <ProgressBar
+                android:id="@+id/player_buffering"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminateTint="@color/blaze_black"
+                android:padding="18dp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/player_next"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/action_next"
+            app:srcCompat="@drawable/ic_skip_next"
+            app:tint="@color/white" />
+
+        <ImageButton
+            android:id="@+id/player_repeat"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/touch_target"
+            android:layout_weight="1"
+            android:contentDescription="@string/action_repeat"
+            app:srcCompat="@drawable/ic_repeat"
+            app:tint="@color/white_70" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/space_s"
+        android:layout_marginBottom="@dimen/space_l">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_queue"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_queue"
+        android:textColor="@color/white_70"
+        app:icon="@drawable/ic_queue"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white_70" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_sleep"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_sleep_timer"
+        android:textColor="@color/white_70"
+        app:icon="@drawable/ic_history"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white_70" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_share"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_share"
+        android:textColor="@color/white_70"
+        app:icon="@drawable/ic_share"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white_70" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mini_player_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/space_m"
+    android:paddingRight="@dimen/space_m"
+    android:paddingBottom="@dimen/space_s"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:id="@+id/mini_player_card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/mini_player_height"
+        android:background="@drawable/bg_mini_player"
+        android:elevation="@dimen/elevation_card"
+        tools:targetApi="lollipop"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="10dp"
+        android:paddingRight="4dp">
+
+        <ImageView
+            android:id="@+id/mini_artwork"
+            android:layout_width="@dimen/artwork_mini"
+            android:layout_height="@dimen/artwork_mini"
+            android:contentDescription="@string/player_artwork"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/mini_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Subtitle"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/mini_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/mini_play_pause"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/cd_play_pause"
+            app:srcCompat="@drawable/ic_play"
+            app:tint="?android:textColorPrimary" />
+
+        <ImageButton
+            android:id="@+id/mini_next"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/action_next"
+            app:srcCompat="@drawable/ic_skip_next"
+            app:tint="?android:textColorPrimary" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/mini_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="14dp"
+        android:layout_marginRight="14dp"
+        android:layout_marginBottom="@dimen/space_s"
+        android:max="1000"
+        android:progressDrawable="@drawable/progress_mini" />
+</FrameLayout>

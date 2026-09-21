@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_s">8dp</dimen>
+    <dimen name="space_m">12dp</dimen>
+    <dimen name="space_l">16dp</dimen>
+    <dimen name="space_xl">24dp</dimen>
+    <dimen name="space_xxl">32dp</dimen>
+
+    <dimen name="corner_s">8dp</dimen>
+    <dimen name="corner_m">12dp</dimen>
+    <dimen name="corner_l">16dp</dimen>
+    <dimen name="corner_xl">24dp</dimen>
+
+    <dimen name="elevation_card">1dp</dimen>
+    <dimen name="elevation_mini_player">6dp</dimen>
+
+    <dimen name="artwork_row">56dp</dimen>
+    <dimen name="artwork_card">148dp</dimen>
+    <dimen name="artwork_card_wide">220dp</dimen>
+    <dimen name="artwork_mini">44dp</dimen>
+    <dimen name="artwork_full_max">340dp</dimen>
+
+    <dimen name="touch_target">48dp</dimen>
+    <dimen name="mini_player_height">64dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
+    <dimen name="search_bar_height">52dp</dimen>
+
+    <dimen name="text_display">28sp</dimen>
+    <dimen name="text_headline">22sp</dimen>
+    <dimen name="text_title">18sp</dimen>
+    <dimen name="text_body">15sp</dimen>
+    <dimen name="text_caption">13sp</dimen>
+    <dimen name="text_label">11sp</dimen>
+</resources>

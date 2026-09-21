@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+/app/build/
+.kotlin/
+
+# Local configuration & secrets (never commit these)
+local.properties
+*.jks
+*.keystore
+keystore.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Logs / captures
+*.log
+captures/
+*.hprof

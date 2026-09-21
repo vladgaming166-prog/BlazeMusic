@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bm_background">#0B0D0C</color>
+    <color name="bm_surface">#121513</color>
+    <color name="bm_surface_variant">#1A241E</color>
+    <color name="bm_surface_elevated">#182019</color>
+    <color name="bm_on_surface">#E8EAED</color>
+    <color name="bm_on_surface_variant">#9AA0A6</color>
+    <color name="bm_on_surface_disabled">#5F6368</color>
+    <color name="bm_primary">#4ADE80</color>
+    <color name="bm_primary_variant">#22C55E</color>
+    <color name="bm_on_primary">#062811</color>
+    <color name="bm_primary_container">#16311F</color>
+    <color name="bm_on_primary_container">#A7F3C4</color>
+    <color name="bm_outline">#2A332E</color>
+    <color name="bm_divider">#1F2823</color>
+    <color name="bm_error">#F28B82</color>
+    <color name="bm_on_error">#3C0A08</color>
+    <color name="bm_error_container">#3B1D1B</color>
+    <color name="bm_warning_container">#3A2F12</color>
+    <color name="bm_on_warning_container">#FDD663</color>
+    <color name="bm_artwork_placeholder">#1E2A22</color>
+    <color name="bm_artwork_placeholder_icon">#4E6A57</color>
+    <color name="bm_scrim">#99000000</color>
+    <color name="bm_ripple">#334ADE80</color>
+    <color name="bm_nav_inactive">#9AA0A6</color>
+    <color name="bm_player_background">#0B0D0C</color>
+</resources>

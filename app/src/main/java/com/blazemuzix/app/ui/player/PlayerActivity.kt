@@ -1,0 +1,345 @@
+package com.blazemuzix.app.ui.player
+
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.media.AudioManager
+import android.os.Bundle
+import android.view.ViewGroup
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.SeekBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.lifecycleScope
+import com.blazemuzix.app.BlazeApp
+import com.blazemuzix.app.R
+import com.blazemuzix.app.data.models.MediaItem
+import com.blazemuzix.app.player.PlayerController
+import com.blazemuzix.app.player.PlayerState
+import com.blazemuzix.app.player.RepeatMode
+import com.blazemuzix.app.ui.common.ItemActionsSheet
+import com.blazemuzix.app.utils.Appearance
+import com.blazemuzix.app.utils.Artwork
+import com.blazemuzix.app.utils.dp
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import androidx.core.graphics.ColorUtils
+import com.blazemuzix.app.utils.Formatters
+import com.blazemuzix.app.utils.applySystemBarInsets
+import com.blazemuzix.app.utils.toast
+import com.blazemuzix.app.utils.visible
+import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
+
+class PlayerActivity : AppCompatActivity() {
+
+    private lateinit var artwork: ImageView
+    private lateinit var title: TextView
+    private lateinit var artist: TextView
+    private lateinit var source: TextView
+    private lateinit var previewNotice: TextView
+    private lateinit var seek: SeekBar
+    private lateinit var position: TextView
+    private lateinit var duration: TextView
+    private lateinit var playPause: ImageButton
+    private lateinit var buffering: ProgressBar
+    private lateinit var shuffle: ImageButton
+    private lateinit var repeat: ImageButton
+    private lateinit var favorite: ImageButton
+    private lateinit var queueButton: MaterialButton
+    private var userSeeking = false
+    private var lastArtworkId: String? = null
+    private var lastError: String? = null
+    private var lastBackgroundId: String? = null
+    private lateinit var root: View
+    private var appearanceVersion = -1
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Appearance.apply(this)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_player)
+        val prefs = BlazeApp.graph(this).prefs
+        appearanceVersion = prefs.appearanceVersion
+        root = findViewById(R.id.player_root)
+        root.applySystemBarInsets(top = true, bottom = true)
+        Appearance.decorate(this, root)
+
+        artwork = findViewById(R.id.player_artwork)
+        title = findViewById(R.id.player_title)
+        artist = findViewById(R.id.player_artist)
+        source = findViewById(R.id.player_source)
+        previewNotice = findViewById(R.id.player_preview_notice)
+        seek = findViewById(R.id.player_seek)
+        position = findViewById(R.id.player_position)
+        duration = findViewById(R.id.player_duration)
+        playPause = findViewById(R.id.player_play_pause)
+        buffering = findViewById(R.id.player_buffering)
+        shuffle = findViewById(R.id.player_shuffle)
+        repeat = findViewById(R.id.player_repeat)
+        favorite = findViewById(R.id.player_favorite)
+        queueButton = findViewById(R.id.player_queue)
+
+        findViewById<View>(R.id.player_collapse).setOnClickListener { finish() }
+        findViewById<View>(R.id.player_more).setOnClickListener {
+            PlayerController.current.current?.let { ItemActionsSheet.show(supportFragmentManager, it, PlayerController.current.queue) }
+        }
+        playPause.setOnClickListener { PlayerController.togglePlayPause(this) }
+        findViewById<View>(R.id.player_next).setOnClickListener { PlayerController.next(this) }
+        findViewById<View>(R.id.player_previous).setOnClickListener { PlayerController.previous(this) }
+        shuffle.setOnClickListener { PlayerController.toggleShuffle(this) }
+        repeat.setOnClickListener { PlayerController.cycleRepeat(this) }
+        favorite.setOnClickListener { toggleFavorite() }
+        queueButton.setOnClickListener { QueueSheet().show(supportFragmentManager, "queue") }
+        findViewById<View>(R.id.player_sleep).setOnClickListener { showSleepPicker() }
+        findViewById<View>(R.id.player_share).setOnClickListener {
+            PlayerController.current.current?.let { com.blazemuzix.app.utils.ExternalActions.share(this, it) }
+        }
+
+        androidx.core.view.ViewCompat.setBackgroundTintList(playPause, android.content.res.ColorStateList.valueOf(Appearance.accentColor(this)))
+        // Player customisation: every switch here maps to a real view.
+        queueButton.visible(prefs.playerShowQueue)
+        shuffle.visible(prefs.playerShowShuffle)
+        repeat.visible(prefs.playerShowRepeat)
+        favorite.visible(prefs.playerShowFavorite)
+        findViewById<View>(R.id.player_seek_group).visible(prefs.playerShowSeekBar)
+        if (!prefs.playerLargeArtwork) {
+            val compact = dp(220)
+            artwork.layoutParams = (artwork.layoutParams as ViewGroup.MarginLayoutParams).apply { width = compact; height = compact }
+        }
+
+        seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) position.text = Formatters.position(progressToMs(progress))
+            }
+
+            override fun onStartTrackingTouch(bar: SeekBar) {
+                userSeeking = true
+            }
+
+            override fun onStopTrackingTouch(bar: SeekBar) {
+                userSeeking = false
+                PlayerController.seekTo(this@PlayerActivity, progressToMs(bar.progress))
+            }
+        })
+
+        val volume = findViewById<SeekBar>(R.id.player_volume)
+        val audio = getSystemService(AUDIO_SERVICE) as AudioManager
+        volume.max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        volume.progress = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+        volume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) audio.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+            }
+            override fun onStartTrackingTouch(bar: SeekBar) = Unit
+            override fun onStopTrackingTouch(bar: SeekBar) = Unit
+        })
+
+        PlayerController.state.observe(this) { render(it) }
+        PlayerController.position.observe(this) { pos ->
+            if (userSeeking) return@observe
+            val total = PlayerController.current.durationMs
+            seek.progress = if (total > 0) (pos * 1000 / total).toInt().coerceIn(0, 1000) else 0
+            position.text = Formatters.position(pos)
+            if (total > 0) duration.text = getString(R.string.player_remaining, Formatters.position((total - pos).coerceAtLeast(0)))
+            updateSleepLabel(PlayerController.sleepUntil.value ?: 0L)
+        }
+        PlayerController.sleepUntil.observe(this) { updateSleepLabel(it) }
+        BlazeApp.graph(this).library.changes.observe(this) { renderFavorite(PlayerController.current.current) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val prefs = BlazeApp.graph(this).prefs
+        if (appearanceVersion != prefs.appearanceVersion) {
+            appearanceVersion = prefs.appearanceVersion
+            recreate()
+        }
+    }
+
+    /**
+     * Tints the player background with the artwork's average colour: a 16x16
+     * decode and one gradient drawable, cheap enough for Android 4.4 and
+     * disabled automatically in reduced-effects / low-end mode.
+     */
+    private fun updateBackground(item: MediaItem) {
+        val prefs = BlazeApp.graph(this).prefs
+        if (!prefs.playerArtworkBackground || item.artworkUrl.isNullOrEmpty()) {
+            if (lastBackgroundId != null) { lastBackgroundId = null; Appearance.decorate(this, root) }
+            return
+        }
+        if (lastBackgroundId == item.id) return
+        lastBackgroundId = item.id
+        val base = Appearance.color(this, android.R.attr.colorBackground)
+        Glide.with(this).asBitmap().load(android.net.Uri.parse(item.artworkUrl)).override(16, 16).centerCrop()
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    if (isFinishing || lastBackgroundId != item.id) return
+                    val avg = averageColor(resource)
+                    val tint = ColorUtils.blendARGB(base, avg, 0.35f)
+                    root.background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(tint, base, base))
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) = Unit
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    if (!isFinishing) Appearance.decorate(this@PlayerActivity, root)
+                }
+            })
+    }
+
+    private fun averageColor(bitmap: Bitmap): Int {
+        var r = 0L; var g = 0L; var b = 0L; var n = 0L
+        val w = bitmap.width; val h = bitmap.height
+        val pixels = IntArray(w * h)
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h)
+        for (p in pixels) {
+            if (Color.alpha(p) < 128) continue
+            r += Color.red(p); g += Color.green(p); b += Color.blue(p); n++
+        }
+        if (n == 0L) return Color.GRAY
+        return Color.rgb((r / n).toInt(), (g / n).toInt(), (b / n).toInt())
+    }
+
+    private fun showSleepPicker() {
+        val labels = arrayOf(
+            getString(R.string.player_sleep_15),
+            getString(R.string.player_sleep_30),
+            getString(R.string.player_sleep_45),
+            getString(R.string.player_sleep_60),
+            getString(R.string.player_sleep_custom),
+            getString(R.string.player_sleep_off)
+        )
+        val minutes = intArrayOf(15, 30, 45, 60, -1, 0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.player_sleep_timer)
+            .setItems(labels) { _, which ->
+                val m = minutes[which]
+                when {
+                    m == 0 -> PlayerController.cancelSleepTimer(this)
+                    m > 0 -> {
+                        PlayerController.setSleepTimer(this, m * 60_000L)
+                        toast(R.string.player_sleep_set)
+                    }
+                    else -> {
+                        val input = android.widget.EditText(this).apply {
+                            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                            hint = "1–180"
+                        }
+                        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setTitle(R.string.player_sleep_custom)
+                            .setView(input)
+                            .setPositiveButton(R.string.action_ok) { _, _ ->
+                                val value = input.text.toString().toIntOrNull()?.coerceIn(1, 180) ?: return@setPositiveButton
+                                PlayerController.setSleepTimer(this, value * 60_000L)
+                                toast(R.string.player_sleep_set)
+                            }
+                            .setNegativeButton(R.string.action_cancel, null)
+                            .show()
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun updateSleepLabel(epoch: Long) {
+        val button = findViewById<MaterialButton>(R.id.player_sleep)
+        if (epoch <= 0L) {
+            button.text = getString(R.string.player_sleep_timer)
+            return
+        }
+        val remaining = (epoch - System.currentTimeMillis()).coerceAtLeast(0L)
+        button.text = getString(R.string.player_sleep_remaining, Formatters.position(remaining))
+    }
+
+    private fun progressToMs(progress: Int): Long {
+        val total = PlayerController.current.durationMs
+        return if (total > 0) progress * total / 1000 else 0L
+    }
+
+    private fun render(state: PlayerState) {
+        val item = state.current
+        if (item == null) {
+            title.text = getString(R.string.player_nothing_playing)
+            artist.text = getString(R.string.player_tap_to_start)
+            source.text = ""
+            previewNotice.visible(false)
+            playPause.isEnabled = false
+            duration.text = getString(R.string.default_time)
+            seek.progress = 0
+            lastArtworkId = null
+            lastBackgroundId = null
+            Appearance.decorate(this, root)
+            Artwork.load(artwork, null as MediaItem?, artworkSize(), resources.getDimensionPixelSize(R.dimen.corner_l))
+            return
+        }
+        playPause.isEnabled = true
+        title.text = item.title
+        artist.text = item.artist + (item.album?.let { " · $it" } ?: "")
+        source.text = getString(R.string.player_now_playing_from, item.source.label)
+        previewNotice.visible(item.previewOnly)
+        duration.text = Formatters.position(state.durationMs)
+        playPause.setImageResource(if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        playPause.contentDescription = getString(if (state.isPlaying) R.string.action_pause else R.string.action_play)
+        buffering.visible(state.isBuffering)
+        playPause.alpha = if (state.isBuffering) 0.5f else 1f
+
+        val active = ContextCompat.getColor(this, R.color.blaze_green_bright)
+        val inactive = ContextCompat.getColor(this, R.color.white_70)
+        ImageViewCompat.setImageTintList(shuffle, android.content.res.ColorStateList.valueOf(if (state.shuffle) active else inactive))
+        shuffle.contentDescription = getString(if (state.shuffle) R.string.player_shuffle_on else R.string.player_shuffle_off)
+        repeat.setImageResource(if (state.repeat == RepeatMode.ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat)
+        ImageViewCompat.setImageTintList(repeat, android.content.res.ColorStateList.valueOf(if (state.repeat != RepeatMode.OFF) active else inactive))
+        repeat.contentDescription = getString(
+            when (state.repeat) {
+                RepeatMode.OFF -> R.string.player_repeat_off
+                RepeatMode.ALL -> R.string.player_repeat_all
+                RepeatMode.ONE -> R.string.player_repeat_one
+            }
+        )
+        queueButton.text = getString(R.string.title_queue) + " · " + state.queue.size
+        renderFavorite(item)
+
+        if (lastArtworkId != item.id) {
+            lastArtworkId = item.id
+            Artwork.load(artwork, item, artworkSize(), resources.getDimensionPixelSize(R.dimen.corner_l))
+            updateBackground(item)
+        }
+        if (state.error != null && state.error != lastError) {
+            lastError = state.error
+            toast(state.error)
+        } else if (state.error == null) {
+            lastError = null
+        }
+    }
+
+    private fun artworkSize(): Int {
+        val lowEnd = BlazeApp.graph(this).prefs.lowEndMode
+        val max = resources.getDimensionPixelSize(R.dimen.artwork_full_max)
+        return if (lowEnd) max / 2 else max
+    }
+
+    private fun renderFavorite(item: MediaItem?) {
+        val fav = item != null && BlazeApp.graph(this).library.isFavorite(item.id)
+        favorite.setImageResource(if (fav) R.drawable.ic_favorite else R.drawable.ic_favorite_border)
+        favorite.contentDescription = getString(if (fav) R.string.action_unfavorite else R.string.action_favorite)
+        ImageViewCompat.setImageTintList(
+            favorite,
+            android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, if (fav) R.color.blaze_green_bright else R.color.white))
+        )
+    }
+
+    private fun toggleFavorite() {
+        val item = PlayerController.current.current ?: return
+        lifecycleScope.launch {
+            val now = BlazeApp.graph(this@PlayerActivity).library.toggleFavorite(item)
+            toast(if (now) R.string.favorite_added else R.string.favorite_removed)
+        }
+    }
+}
