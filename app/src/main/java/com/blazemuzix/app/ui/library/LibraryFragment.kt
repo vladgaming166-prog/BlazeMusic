@@ -123,6 +123,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                 R.id.tab_folders -> LibraryTab.FOLDERS
                 R.id.tab_downloads -> LibraryTab.DOWNLOADS
                 R.id.tab_offline -> LibraryTab.OFFLINE
+                R.id.tab_uploaded -> LibraryTab.UPLOADED
                 else -> LibraryTab.SONGS
             }
             viewModel.selectTab(tab)
@@ -130,7 +131,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
 
         playAll.setOnClickListener { playAll(shuffle = false) }
         shuffle.setOnClickListener { playAll(shuffle = true) }
-        addButton.setOnClickListener { ItemActions.newPlaylistDialog(requireActivity()) { viewModel.load() } }
+        addButton.setOnClickListener {
+            if (viewModel.tab == LibraryTab.UPLOADED) {
+                startActivity(Intent(requireContext(), com.blazemuzix.app.ui.cloud.UploadActivity::class.java))
+            } else {
+                ItemActions.newPlaylistDialog(requireActivity()) { viewModel.load() }
+            }
+        }
         rescanButton.setOnClickListener { requestPermissionOrScan() }
 
         viewModel.state.observe(viewLifecycleOwner) { render(it) }
@@ -164,6 +171,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         LibraryTab.FOLDERS -> R.id.tab_folders
         LibraryTab.DOWNLOADS -> R.id.tab_downloads
         LibraryTab.OFFLINE -> R.id.tab_offline
+        LibraryTab.UPLOADED -> R.id.tab_uploaded
     }
 
     private fun rebuildAdapter() {
@@ -214,7 +222,7 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         val local = BlazeApp.graph(requireContext()).localProvider
         val isLocalTab = tab == LibraryTab.SONGS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS ||
             tab == LibraryTab.FOLDERS || tab == LibraryTab.DOWNLOADS || tab == LibraryTab.OFFLINE
-        addButton.visible(tab == LibraryTab.PLAYLISTS)
+        addButton.visible(tab == LibraryTab.PLAYLISTS || tab == LibraryTab.UPLOADED)
         rescanButton.visible(isLocalTab)
         notice.visible(tab == LibraryTab.DOWNLOADS)
         val selectable = tab == LibraryTab.SONGS || tab == LibraryTab.FAVORITES || tab == LibraryTab.RECENT ||
@@ -278,15 +286,18 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                     LibraryTab.FOLDERS -> Triple(R.string.library_folders_empty_title, R.string.library_folders_empty_message, R.drawable.ic_folder)
                     LibraryTab.DOWNLOADS -> Triple(R.string.library_downloads_empty_title, R.string.library_downloads_empty_message, R.drawable.ic_download)
                     LibraryTab.OFFLINE -> Triple(R.string.library_local_empty_title, R.string.library_local_empty_message, R.drawable.ic_phone)
+                    LibraryTab.UPLOADED -> Triple(R.string.library_uploaded_empty_title, R.string.library_uploaded_empty_message, R.drawable.ic_music_note)
                 }
                 val action = when (tab) {
                     LibraryTab.SONGS, LibraryTab.ALBUMS, LibraryTab.ARTISTS, LibraryTab.FOLDERS, LibraryTab.DOWNLOADS, LibraryTab.OFFLINE -> getString(R.string.action_rescan)
                     LibraryTab.PLAYLISTS -> getString(R.string.action_new_playlist)
+                    LibraryTab.UPLOADED -> getString(R.string.home_quick_upload)
                     else -> null
                 }
                 state.empty(getString(title), getString(message), icon, action) {
                     when (tab) {
                         LibraryTab.PLAYLISTS -> ItemActions.newPlaylistDialog(requireActivity()) { viewModel.load() }
+                        LibraryTab.UPLOADED -> startActivity(Intent(requireContext(), com.blazemuzix.app.ui.cloud.UploadActivity::class.java))
                         else -> requestPermissionOrScan()
                     }
                 }

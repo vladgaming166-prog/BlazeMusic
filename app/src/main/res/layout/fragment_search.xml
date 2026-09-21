@@ -140,6 +140,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filter_spotify" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_cloud"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_cloud" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_users"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_users" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 

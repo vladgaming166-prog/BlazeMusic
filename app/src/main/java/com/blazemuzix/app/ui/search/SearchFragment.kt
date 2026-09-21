@@ -123,6 +123,8 @@ class SearchFragment : Fragment(R.layout.fragment_search), MediaAdapter.Listener
                 R.id.filter_local -> SearchFilter.LOCAL
                 R.id.filter_youtube -> SearchFilter.YOUTUBE
                 R.id.filter_spotify -> SearchFilter.SPOTIFY
+                R.id.filter_cloud -> SearchFilter.CLOUD
+                R.id.filter_users -> SearchFilter.USERS
                 else -> SearchFilter.ALL
             }
             viewModel.setFilter(filter)

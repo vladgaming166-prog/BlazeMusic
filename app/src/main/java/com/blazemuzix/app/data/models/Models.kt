@@ -45,7 +45,9 @@ enum class SearchFilter(val type: MediaType?, val source: Source? = null) {
     SHORTS(MediaType.SHORT),
     LOCAL(null, Source.LOCAL),
     YOUTUBE(null, Source.YOUTUBE),
-    SPOTIFY(null, Source.SPOTIFY)
+    SPOTIFY(null, Source.SPOTIFY),
+    CLOUD(null, Source.CLOUD),
+    USERS(MediaType.USER, Source.CLOUD)
 }
 
 /**

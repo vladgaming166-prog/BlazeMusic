@@ -7,7 +7,8 @@ enum class Source(val id: String, val label: String) {
     YOUTUBE("youtube", "YouTube"),
     YOUTUBE_MUSIC("youtube_music", "YouTube Music"),
     SPOTIFY("spotify", "Spotify"),
-    LOCAL("local", "This device");
+    LOCAL("local", "This device"),
+    CLOUD("cloud", "BlazeMuzix Cloud");
 
     companion object {
         fun fromId(id: String?): Source = entries.firstOrNull { it.id == id } ?: LOCAL
@@ -20,7 +21,8 @@ enum class MediaType(val id: String) {
     ARTIST("artist"),
     PLAYLIST("playlist"),
     VIDEO("video"),
-    SHORT("short");
+    SHORT("short"),
+    USER("user");
 
     val isCollection: Boolean get() = this == ALBUM || this == PLAYLIST || this == ARTIST
 

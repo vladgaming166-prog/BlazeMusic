@@ -40,6 +40,7 @@
     <color name="source_youtube">#CC0000</color>
     <color name="source_spotify">#1DB954</color>
     <color name="source_local">#188A4C</color>
+    <color name="source_cloud">#0F5F34</color>
 
     <!-- Static (theme independent) -->
     <color name="white">#FFFFFF</color>

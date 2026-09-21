@@ -90,6 +90,7 @@ class MediaItemTest {
         assertEquals(Source.LOCAL, com.blazemuzix.app.data.models.SearchFilter.LOCAL.source)
         assertEquals(Source.YOUTUBE, com.blazemuzix.app.data.models.SearchFilter.YOUTUBE.source)
         assertEquals(Source.SPOTIFY, com.blazemuzix.app.data.models.SearchFilter.SPOTIFY.source)
+        assertEquals(Source.CLOUD, com.blazemuzix.app.data.models.SearchFilter.CLOUD.source)
         assertNull(com.blazemuzix.app.data.models.SearchFilter.ALL.source)
     }
 }

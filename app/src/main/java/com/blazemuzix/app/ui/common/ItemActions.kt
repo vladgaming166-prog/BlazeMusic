@@ -51,6 +51,7 @@ object ItemActions {
         Source.SPOTIFY -> context.getString(R.string.action_open_in_spotify)
         Source.YOUTUBE -> context.getString(R.string.action_open_in_youtube)
         Source.YOUTUBE_MUSIC -> context.getString(R.string.action_open_in_youtube_music)
+        Source.CLOUD -> context.getString(R.string.action_open_in_cloud)
         Source.LOCAL -> context.getString(R.string.action_play)
     }
 
@@ -69,6 +70,12 @@ object ItemActions {
     fun primary(activity: FragmentActivity, item: MediaItem, queueContext: List<MediaItem> = listOf(item), index: Int = 0) {
         val navigator = activity as? Navigator
         when {
+            item.type == MediaType.USER -> {
+                activity.startActivity(
+                    Intent(activity, com.blazemuzix.app.ui.cloud.ProfileActivity::class.java)
+                        .putExtra(com.blazemuzix.app.ui.cloud.ProfileActivity.EXTRA_ID, item.providerId)
+                )
+            }
             item.type.isCollection && item.source == Source.LOCAL -> navigator?.openCollection(item)
             item.type.isCollection -> navigator?.openCollection(item)
             item.canPlayDirect -> {
@@ -209,6 +216,14 @@ class ItemActionsSheet : BottomSheetDialogFragment() {
         }
         if (item.externalUrl != null) {
             add(R.drawable.ic_share, getString(R.string.action_share)) { ExternalActions.share(activity, item) }
+        }
+        if (item.source == Source.CLOUD && item.type == MediaType.SONG) {
+            add(R.drawable.ic_info, getString(R.string.action_open_in_cloud)) {
+                activity.startActivity(
+                    Intent(activity, com.blazemuzix.app.ui.cloud.TrackActivity::class.java)
+                        .putExtra(com.blazemuzix.app.ui.cloud.TrackActivity.EXTRA_ID, item.providerId)
+                )
+            }
         }
         for (extra in extras) add(extra.iconRes, extra.label, extra.onClick)
     }

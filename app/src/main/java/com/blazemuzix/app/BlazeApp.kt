@@ -4,9 +4,14 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.multidex.MultiDexApplication
+import com.blazemuzix.app.auth.AuthRepository
+import com.blazemuzix.app.auth.CloudAuth
 import com.blazemuzix.app.auth.GoogleAuth
 import com.blazemuzix.app.auth.SecureStore
 import com.blazemuzix.app.auth.SpotifyAuth
+import com.blazemuzix.app.cloud.CloudCache
+import com.blazemuzix.app.cloud.CloudClient
+import com.blazemuzix.app.cloud.CloudRepository
 import com.blazemuzix.app.data.cache.ResponseCache
 import com.blazemuzix.app.data.db.BlazeDatabase
 import com.blazemuzix.app.data.prefs.AppPreferences
@@ -14,6 +19,7 @@ import com.blazemuzix.app.data.repository.DiscoveryRepository
 import com.blazemuzix.app.data.repository.LibraryRepository
 import com.blazemuzix.app.network.HttpClient
 import com.blazemuzix.app.network.NetworkMonitor
+import com.blazemuzix.app.providers.CloudMusicProvider
 import com.blazemuzix.app.providers.LocalMusicProvider
 import com.blazemuzix.app.providers.ProviderManager
 import com.blazemuzix.app.providers.ProviderRegistry
@@ -50,6 +56,7 @@ class BlazeApp : MultiDexApplication() {
         graph.prefs.ensureDefaults()
         graph.prefs.applyTheme()
         graph.googleAuth.restoreFromLastAccount()
+        appScope.launch { graph.auth.restore() }
         appScope.launch {
             graph.library.warmUp()
             val saved = runCatching { graph.library.loadQueue() }.getOrNull()
@@ -86,7 +93,12 @@ class BlazeApp : MultiDexApplication() {
         val library = LibraryRepository(database)
         val secureStore = SecureStore(context)
         val googleAuth = GoogleAuth(context)
+        val cloudAuth = CloudAuth(http, secureStore)
+        val auth = AuthRepository(googleAuth, cloudAuth)
         val spotifyAuth = SpotifyAuth(context, http, secureStore)
+        val cloudClient = CloudClient(http) { cloudAuth.accessToken() }
+        val cloudCache = CloudCache(context)
+        val cloud = CloudRepository(context, cloudClient, cloudAuth, cloudCache)
         val localProvider = LocalMusicProvider(context)
         val youtubeProvider = YouTubeProvider(http, BuildConfig.YOUTUBE_API_KEY)
         val spotifyProvider = SpotifyProvider(
@@ -96,8 +108,9 @@ class BlazeApp : MultiDexApplication() {
             userAccessToken = { spotifyAuth.validAccessToken() },
             signedIn = { spotifyAuth.isSignedIn }
         )
-        val providers = ProviderRegistry(localProvider, youtubeProvider, spotifyProvider, onlineEnabled = BuildConfig.ONLINE_PROVIDERS)
-        val providerManager = ProviderManager(context, providers, googleAuth, spotifyAuth)
+        val cloudProvider = CloudMusicProvider(cloud)
+        val providers = ProviderRegistry(localProvider, youtubeProvider, spotifyProvider, cloudProvider, onlineEnabled = BuildConfig.ONLINE_PROVIDERS)
+        val providerManager = ProviderManager(context, providers, googleAuth, spotifyAuth, cloud)
         val discovery = DiscoveryRepository(providers, library, network)
     }
 

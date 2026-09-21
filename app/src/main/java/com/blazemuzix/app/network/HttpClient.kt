@@ -8,6 +8,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
@@ -80,6 +81,71 @@ class HttpClient(
         return parse(execute("POST", url, merged, body.toByteArray(Charsets.UTF_8), null))
     }
 
+    suspend fun postJson(url: String, headers: Map<String, String>, json: JSONObject): JSONObject {
+        if (!networkMonitor.isOnline) throw ApiException.Offline()
+        val merged = HashMap(headers).apply { put("Content-Type", "application/json") }
+        val raw = execute("POST", url, merged, json.toString().toByteArray(Charsets.UTF_8), "application/json", retries = 0)
+        return if (raw.isBlank()) JSONObject() else parseFlexible(raw)
+    }
+
+    suspend fun putJson(url: String, headers: Map<String, String>, json: JSONObject): JSONObject {
+        if (!networkMonitor.isOnline) throw ApiException.Offline()
+        val merged = HashMap(headers).apply { put("Content-Type", "application/json") }
+        val raw = execute("PUT", url, merged, json.toString().toByteArray(Charsets.UTF_8), "application/json", retries = 0)
+        return if (raw.isBlank()) JSONObject() else parseFlexible(raw)
+    }
+
+    suspend fun patchJson(url: String, headers: Map<String, String>, json: JSONObject): JSONObject {
+        if (!networkMonitor.isOnline) throw ApiException.Offline()
+        val merged = HashMap(headers).apply { put("Content-Type", "application/json") }
+        val raw = execute("PATCH", url, merged, json.toString().toByteArray(Charsets.UTF_8), "application/json", retries = 0)
+        return if (raw.isBlank()) JSONObject() else parseFlexible(raw)
+    }
+
+    suspend fun delete(url: String, headers: Map<String, String> = emptyMap()): String {
+        if (!networkMonitor.isOnline) throw ApiException.Offline()
+        return execute("DELETE", url, headers, null, null, retries = 0)
+    }
+
+    suspend fun getArray(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        cacheTtlMs: Long = 0L,
+        cacheKey: String = url
+    ): JSONArray {
+        val raw = get(url, headers, cacheTtlMs, cacheKey, allowStaleWhenOffline = cacheTtlMs > 0)
+        return try {
+            JSONArray(raw)
+        } catch (e: Exception) {
+            throw ApiException.Parse(e)
+        }
+    }
+
+    /**
+     * PUT binary (audio/cover). Progress is 0–100. Cancellation disconnects the socket.
+     * Not retried: a partial upload must be restarted by the caller.
+     */
+    suspend fun putBytes(
+        url: String,
+        headers: Map<String, String>,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: ((Int) -> Unit)? = null
+    ): String {
+        if (!networkMonitor.isOnline) throw ApiException.Offline()
+        return withContext(Dispatchers.IO) {
+            rawPut(url, headers, bytes, contentType, onProgress)
+        }
+    }
+
+    private fun parseFlexible(raw: String): JSONObject {
+        val trimmed = raw.trim()
+        if (trimmed.startsWith("[")) {
+            return JSONObject().put("items", JSONArray(trimmed))
+        }
+        return parse(trimmed)
+    }
+
     private fun parse(raw: String): JSONObject = try {
         JSONObject(raw)
     } catch (e: Exception) {
@@ -91,11 +157,13 @@ class HttpClient(
         url: String,
         headers: Map<String, String>,
         body: ByteArray?,
-        contentType: String?
+        contentType: String?,
+        retries: Int = MAX_RETRIES
     ): String = semaphore.withPermit {
         var attempt = 0
         var lastError: ApiException? = null
-        while (attempt <= MAX_RETRIES) {
+        val max = retries
+        while (attempt <= max) {
             try {
                 return@withPermit withContext(Dispatchers.IO) { rawRequest(method, url, headers, body, contentType) }
             } catch (e: CancellationException) {
@@ -103,7 +171,7 @@ class HttpClient(
             } catch (e: ApiException) {
                 lastError = e
                 val transient = e is ApiException.ServerError || e is ApiException.Timeout || e is ApiException.Network
-                if (!transient || attempt == MAX_RETRIES) throw e
+                if (!transient || attempt == max) throw e
                 if (!networkMonitor.isOnline) throw ApiException.Offline()
                 delay(BASE_BACKOFF_MS shl attempt)
                 attempt++
@@ -125,14 +193,15 @@ class HttpClient(
         }
         try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                requestMethod = method
+                requestMethod = if (method == "PATCH") "POST" else method
                 connectTimeout = CONNECT_TIMEOUT_MS
-                readTimeout = READ_TIMEOUT_MS
+                readTimeout = if (body != null && body.size > 64_000) UPLOAD_READ_TIMEOUT_MS else READ_TIMEOUT_MS
                 useCaches = false
                 instanceFollowRedirects = true
                 setRequestProperty("Accept", "application/json")
                 setRequestProperty("Accept-Encoding", "gzip")
                 setRequestProperty("User-Agent", USER_AGENT)
+                if (method == "PATCH") setRequestProperty("X-HTTP-Method-Override", "PATCH")
                 contentType?.let { setRequestProperty("Content-Type", it) }
                 headers.forEach { (k, v) -> setRequestProperty(k, v) }
                 if (body != null) {
@@ -164,6 +233,62 @@ class HttpClient(
         }
     }
 
+    private suspend fun rawPut(
+        url: String,
+        headers: Map<String, String>,
+        bytes: ByteArray,
+        contentType: String,
+        onProgress: ((Int) -> Unit)?
+    ): String = suspendCancellableCoroutine { cont ->
+        var connection: HttpURLConnection? = null
+        cont.invokeOnCancellation { try { connection?.disconnect() } catch (_: Exception) {} }
+        try {
+            connection = (URL(url).openConnection() as HttpURLConnection).apply {
+                requestMethod = "PUT"
+                connectTimeout = CONNECT_TIMEOUT_MS
+                readTimeout = UPLOAD_READ_TIMEOUT_MS
+                useCaches = false
+                doOutput = true
+                instanceFollowRedirects = true
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Content-Type", contentType)
+                setRequestProperty("User-Agent", USER_AGENT)
+                headers.forEach { (k, v) -> setRequestProperty(k, v) }
+                setFixedLengthStreamingMode(bytes.size)
+            }
+            connection.outputStream.use { out ->
+                var sent = 0
+                val chunk = 16 * 1024
+                while (sent < bytes.size) {
+                    if (!cont.isActive) throw CancellationException()
+                    val n = minOf(chunk, bytes.size - sent)
+                    out.write(bytes, sent, n)
+                    sent += n
+                    onProgress?.invoke((sent * 100L / bytes.size).toInt().coerceIn(0, 100))
+                }
+                out.flush()
+            }
+            val code = connection.responseCode
+            val stream: InputStream? = if (code in 200..299) connection.inputStream else connection.errorStream
+            val text = stream?.let { readBody(it, connection.contentEncoding) } ?: ""
+            if (code in 200..299) cont.resume(text) else cont.resumeWithException(mapHttpError(code, text, connection))
+        } catch (e: CancellationException) {
+            if (cont.isActive) cont.resumeWithException(e)
+        } catch (e: ApiException) {
+            if (cont.isActive) cont.resumeWithException(e)
+        } catch (e: SocketTimeoutException) {
+            if (cont.isActive) cont.resumeWithException(ApiException.Timeout(e))
+        } catch (e: UnknownHostException) {
+            if (cont.isActive) cont.resumeWithException(if (networkMonitor.isOnline) ApiException.Network(e) else ApiException.Offline())
+        } catch (e: IOException) {
+            if (cont.isActive) cont.resumeWithException(ApiException.Network(e))
+        } catch (e: Exception) {
+            if (cont.isActive) cont.resumeWithException(ApiException.Network(e))
+        } finally {
+            try { connection?.disconnect() } catch (_: Exception) {}
+        }
+    }
+
     private fun readBody(stream: InputStream, encoding: String?): String {
         val input = if (encoding.equals("gzip", ignoreCase = true)) GZIPInputStream(stream) else stream
         return input.bufferedReader(Charsets.UTF_8).use(BufferedReader::readText)
@@ -175,7 +300,9 @@ class HttpClient(
             json.optJSONObject("error")?.let { err ->
                 err.optJSONArray("errors")?.optJSONObject(0)?.optString("reason")
                     ?: err.optString("message")
-            } ?: json.optString("error_description").ifEmpty { json.optString("error") }
+            } ?: json.optString("error_description").ifEmpty {
+                json.optString("msg").ifEmpty { json.optString("message").ifEmpty { json.optString("error") } }
+            }
         } catch (_: Exception) {
             ""
         }
@@ -187,7 +314,7 @@ class HttpClient(
                 ApiException.Unauthorized(hostLabel(connection))
             }
             429 -> ApiException.RateLimited(connection.getHeaderField("Retry-After")?.toIntOrNull() ?: 0)
-            400, 404, 422 -> ApiException.InvalidRequest(reason.ifEmpty { null })
+            400, 404, 409, 422 -> ApiException.InvalidRequest(reason.ifEmpty { null })
             in 500..599 -> ApiException.ServerError(code)
             else -> ApiException.Network(IOException("HTTP $code $reason"))
         }
@@ -198,6 +325,7 @@ class HttpClient(
         return when {
             host.contains("googleapis") -> "YouTube"
             host.contains("spotify") -> "Spotify"
+            host.contains("supabase") -> "BlazeMuzix Cloud"
             else -> host
         }
     }
@@ -208,7 +336,8 @@ class HttpClient(
         private const val BASE_BACKOFF_MS = 600L
         private val CONNECT_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10).toInt()
         private val READ_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(15).toInt()
-        private const val USER_AGENT = "BlazeMuzix/1.0 (Android)"
+        private val UPLOAD_READ_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(120).toInt()
+        private const val USER_AGENT = "BlazeMuzix/2.1.0 (Android)"
 
         fun encode(value: String): String = URLEncoder.encode(value, "UTF-8")
 

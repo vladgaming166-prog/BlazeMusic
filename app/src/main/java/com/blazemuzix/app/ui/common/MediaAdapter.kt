@@ -272,7 +272,7 @@ class MediaAdapter(
                     item.album?.takeIf { options.showAlbum && it.isNotBlank() }
                 ).joinToString(" · ")
                 MediaType.ALBUM -> if (item.trackCount > 0) "$type · ${item.artist} · ${item.trackCount}" else "$type · ${item.artist}"
-                MediaType.ARTIST -> "$type · ${item.artist}"
+                MediaType.ARTIST, MediaType.USER -> "$type · ${item.artist}"
                 MediaType.PLAYLIST -> if (item.trackCount > 0) "$type · ${item.artist} · ${context.getString(R.string.playlist_track_count, item.trackCount)}" else "$type · ${item.artist}"
             }
         }

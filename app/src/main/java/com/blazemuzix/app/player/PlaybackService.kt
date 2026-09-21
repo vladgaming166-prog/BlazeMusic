@@ -393,6 +393,9 @@ class PlaybackService : MediaBrowserServiceCompat() {
         updateMetadata(item)
         publish(buffering = true)
         scope.launch { BlazeApp.graph(this@PlaybackService).library.recordPlayed(item) }
+        if (item.source == com.blazemuzix.app.data.models.Source.CLOUD && item.providerId.isNotEmpty()) {
+            scope.launch { runCatching { BlazeApp.graph(this@PlaybackService).cloud.incrementPlay(item.providerId) } }
+        }
     }
 
     private fun play() {

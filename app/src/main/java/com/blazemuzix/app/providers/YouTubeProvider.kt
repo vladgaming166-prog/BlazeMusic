@@ -50,6 +50,7 @@ class YouTubeProvider(
             MediaType.VIDEO, MediaType.SONG, MediaType.SHORT -> "video"
             MediaType.PLAYLIST, MediaType.ALBUM -> "playlist"
             MediaType.ARTIST -> "channel"
+            MediaType.USER -> return Page.empty()
         }
         val params = linkedMapOf<String, String?>(
             "part" to "snippet",

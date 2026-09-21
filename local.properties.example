@@ -27,6 +27,12 @@ SPOTIFY_REDIRECT_URI=blazemuzix://callback
 # public profile/email without minting an ID token.
 GOOGLE_WEB_CLIENT_ID=
 
+# --- BlazeMuzix Cloud (Supabase) --------------------------------------------
+# Project URL (https://xxxx.supabase.co) and the public anon key from
+# Project Settings → API. NEVER put the service_role key here.
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+
 # --- Optional release signing (see README "Release signing") ---------------
 # KEYSTORE_FILE=/absolute/path/to/release.jks
 # KEYSTORE_PASSWORD=

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.media.AudioManager
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.View
@@ -126,6 +127,18 @@ class PlayerActivity : AppCompatActivity() {
                 userSeeking = false
                 PlayerController.seekTo(this@PlayerActivity, progressToMs(bar.progress))
             }
+        })
+
+        val volume = findViewById<SeekBar>(R.id.player_volume)
+        val audio = getSystemService(AUDIO_SERVICE) as AudioManager
+        volume.max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        volume.progress = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+        volume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser) audio.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+            }
+            override fun onStartTrackingTouch(bar: SeekBar) = Unit
+            override fun onStopTrackingTouch(bar: SeekBar) = Unit
         })
 
         PlayerController.state.observe(this) { render(it) }

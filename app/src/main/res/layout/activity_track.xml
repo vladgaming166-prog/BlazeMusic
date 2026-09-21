@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/track_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_xl">
+
+        <ImageButton
+            android:id="@+id/track_back"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:layout_marginLeft="@dimen/space_s"
+            android:layout_marginTop="@dimen/space_s"
+            android:contentDescription="@string/action_back"
+            app:srcCompat="@drawable/ic_arrow_back" />
+
+        <ImageView
+            android:id="@+id/track_cover"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_m"
+            android:contentDescription="@string/player_artwork"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_l"
+            android:layout_marginRight="@dimen/space_xl"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Title" />
+
+        <TextView
+            android:id="@+id/track_artist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingLeft="@dimen/space_xl"
+            android:paddingRight="@dimen/space_xl"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/track_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingLeft="@dimen/space_xl"
+            android:paddingRight="@dimen/space_xl"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
+
+        <TextView
+            android:id="@+id/track_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_m"
+            android:layout_marginRight="@dimen/space_xl"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Body" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="@dimen/space_m">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_play"
+                style="@style/Widget.BlazeMuzix.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_play"
+                app:icon="@drawable/ic_play" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_like"
+                style="@style/Widget.BlazeMuzix.Button.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/space_s"
+                android:text="@string/action_favorite"
+                app:icon="@drawable/ic_favorite_border" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_playlist"
+                style="@style/Widget.BlazeMuzix.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_add_to_playlist" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_share"
+                style="@style/Widget.BlazeMuzix.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_share" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_report"
+                style="@style/Widget.BlazeMuzix.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_report" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/track_offline"
+            style="@style/Widget.BlazeMuzix.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/action_offline_own"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_l"
+            android:text="@string/action_comment"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Subtitle" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/space_xl"
+            android:paddingRight="@dimen/space_xl">
+
+            <EditText
+                android:id="@+id/track_comment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/comment_hint"
+                android:inputType="textCapSentences" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/track_comment_send"
+                style="@style/Widget.BlazeMuzix.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/comment_send" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/track_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/space_xl"
+            android:paddingRight="@dimen/space_xl" />
+    </LinearLayout>
+</ScrollView>

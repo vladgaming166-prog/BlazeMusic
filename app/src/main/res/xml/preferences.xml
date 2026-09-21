@@ -261,6 +261,16 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/settings_category_privacy"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_privacy"
+            android:title="@string/settings_public_profile"
+            android:summary="@string/settings_public_profile_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/settings_category_providers"
         app:iconSpaceReserved="false">
         <Preference
@@ -271,6 +281,11 @@
         <Preference
             android:key="pref_provider_spotify"
             android:title="@string/provider_spotify"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_cloud"
+            android:title="@string/provider_cloud"
+            android:selectable="false"
             app:iconSpaceReserved="false" />
         <Preference
             android:key="pref_provider_local"

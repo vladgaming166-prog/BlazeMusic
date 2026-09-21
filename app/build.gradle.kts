@@ -26,9 +26,22 @@ fun secret(name: String): String =
 
 // Report which provider credentials reached the build (names only, never values) so a
 // misconfigured GitHub Secret is visible in the Actions log instead of only on the phone.
-val providerConfigSummary = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "GOOGLE_WEB_CLIENT_ID")
+val providerConfigSummary = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "GOOGLE_WEB_CLIENT_ID", "SUPABASE_URL", "SUPABASE_ANON_KEY")
     .joinToString(", ") { "$it=" + if (secret(it).isEmpty()) "missing" else "set" }
 logger.lifecycle("BlazeMuzix provider configuration: $providerConfigSummary")
+
+tasks.register("checkConfig") {
+    group = "verification"
+    description = "Prints which provider credentials reached the build (names only)."
+    doLast {
+        logger.lifecycle("BlazeMuzix provider configuration: $providerConfigSummary")
+        val missing = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "GOOGLE_WEB_CLIENT_ID", "SUPABASE_URL", "SUPABASE_ANON_KEY")
+            .filter { secret(it).isEmpty() }
+        if (missing.isNotEmpty()) {
+            logger.lifecycle("Missing (features will show Not configured): ${missing.joinToString()}")
+        }
+    }
+}
 
 fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
@@ -45,8 +58,8 @@ android {
         // has been selected so that it still supports API 19.
         minSdk = 19
         targetSdk = 36
-        versionCode = 200
-        versionName = "2.0.0"
+        versionCode = 210
+        versionName = "2.1.0"
 
         // Legacy multidex is required for API < 21 because the debug build easily
         // exceeds the 65k method limit.
@@ -63,6 +76,9 @@ android {
         // requests profile/email but cannot mint an ID token. Never put a client *secret* here.
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(secret("GOOGLE_WEB_CLIENT_ID")))
         buildConfigField("String", "SPOTIFY_REDIRECT_URI", quoted(secret("SPOTIFY_REDIRECT_URI").ifEmpty { "blazemuzix://callback" }))
+        // Public Supabase project URL + anon (publishable) key. The service-role key must NEVER be set here.
+        buildConfigField("String", "SUPABASE_URL", quoted(secret("SUPABASE_URL").trimEnd('/')))
+        buildConfigField("String", "SUPABASE_ANON_KEY", quoted(secret("SUPABASE_ANON_KEY")))
 
         resourceConfigurations += listOf("en")
     }

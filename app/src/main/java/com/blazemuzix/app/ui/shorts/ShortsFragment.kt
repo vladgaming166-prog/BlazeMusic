@@ -98,6 +98,16 @@ class ShortsFragment : Fragment(R.layout.fragment_shorts), ShortsAdapter.Listene
 
     override fun onPlay(item: MediaItem, holder: ShortsAdapter.Holder) {
         val context = requireContext()
+        if (item.source == com.blazemuzix.app.data.models.Source.CLOUD) {
+            val url = item.playbackUri ?: item.externalUrl
+            if (url.isNullOrBlank()) {
+                context.toast(R.string.shorts_cloud_empty)
+                return
+            }
+            ExternalActions.openUrl(context, url)
+            lifecycleScope.launch { BlazeApp.graph(context).library.recordPlayed(item) }
+            return
+        }
         if (!BlazeApp.graph(context).network.isOnline) {
             context.toast(R.string.state_offline_title)
             return

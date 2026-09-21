@@ -34,6 +34,7 @@ class DiscoveryRepository(
         val offline = !network.isOnline
         val recent = async { runCatching { library.recentlyPlayed(20) }.getOrDefault(emptyList()) }
         val favorites = async { runCatching { library.favorites() }.getOrDefault(emptyList()) }
+        val playlists = async { runCatching { library.playlists() }.getOrDefault(emptyList()) }
         val local = async { runCatching { providers.local.homeSections() }.getOrDefault(emptyList()) }
         val onlineJobs = if (offline) emptyList() else providers.configuredOnline.map { p ->
             async { runCatching { p.homeSections() } }
@@ -57,6 +58,10 @@ class DiscoveryRepository(
         localSections.firstOrNull()?.let { sections.add(it) }
         favorites.await().takeIf { it.isNotEmpty() }?.let {
             sections.add(Section("favorites", R.string.section_favorites, it.take(20), SectionLayout.CARDS))
+        }
+        playlists.await().takeIf { it.isNotEmpty() }?.let { list ->
+            val items = list.take(20).map { with(com.blazemuzix.app.ui.library.LibraryViewModel) { it.toMediaItem() } }
+            sections.add(Section("your_playlists", R.string.section_your_library_playlists, items, SectionLayout.CARDS))
         }
         sections.addAll(localSections.drop(1))
         if (!offline) {
@@ -147,9 +152,26 @@ class DiscoveryRepository(
 
     suspend fun shorts(pageToken: String?): Page<MediaItem> {
         if (!network.isOnline) throw ApiException.Offline()
-        val provider = providers.youtube
-        if (!provider.isConfigured) throw ApiException.NotConfigured(provider.displayName)
-        return provider.shorts(pageToken)
+        val youtubeReady = providers.youtube.isConfigured
+        val cloudReady = providers.cloud.isConfigured
+        if (!youtubeReady && !cloudReady) {
+            throw ApiException.NotConfigured("YouTube")
+        }
+        val cloudPage = if (pageToken == null && cloudReady) {
+            runCatching { providers.cloud.shorts(null) }.getOrDefault(Page.empty())
+        } else {
+            Page.empty()
+        }
+        if (!youtubeReady) {
+            return if (cloudPage.items.isEmpty()) {
+                throw ApiException.NotConfigured("YouTube")
+            } else {
+                cloudPage
+            }
+        }
+        val yt = providers.youtube.shorts(pageToken)
+        val items = if (pageToken == null) cloudPage.items + yt.items else yt.items
+        return Page(items, yt.nextPageToken)
     }
 
     suspend fun collectionItems(item: MediaItem, pageToken: String?): Page<MediaItem> {

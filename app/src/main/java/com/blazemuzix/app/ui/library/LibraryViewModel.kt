@@ -17,7 +17,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-enum class LibraryTab { SONGS, ALBUMS, ARTISTS, PLAYLISTS, FAVORITES, RECENT, FOLDERS, DOWNLOADS, OFFLINE }
+enum class LibraryTab { SONGS, ALBUMS, ARTISTS, PLAYLISTS, FAVORITES, RECENT, FOLDERS, DOWNLOADS, OFFLINE, UPLOADED }
 
 class LibraryViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -83,7 +83,11 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
                     LibraryTab.RECENT -> graph.library.recentlyPlayed()
                     LibraryTab.FOLDERS -> graph.localProvider.folders()
                     LibraryTab.DOWNLOADS -> graph.localProvider.downloads()
-                    LibraryTab.OFFLINE -> graph.localProvider.allSongs()
+                    LibraryTab.OFFLINE -> graph.localProvider.allSongs() + graph.cloud.cache.cachedTracks().map { it.toMediaItem() }
+                    LibraryTab.UPLOADED -> {
+                        if (!graph.auth.hasCloudSession()) emptyList()
+                        else graph.cloud.myUploads().map { it.toMediaItem() }
+                    }
                 }
                 publish()
             } catch (e: CancellationException) {

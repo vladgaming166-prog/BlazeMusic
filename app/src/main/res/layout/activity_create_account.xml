@@ -28,6 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_l"
+            android:text="@string/auth_create_title"
             android:textAppearance="@style/TextAppearance.BlazeMuzix.Headline" />
 
         <TextView
@@ -35,6 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s"
+            android:text="@string/auth_create_message"
             android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -43,6 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_m"
+            android:text="@string/auth_create_notice"
             android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
 
         <TextView
@@ -50,21 +53,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_m"
-            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
             android:textColor="@color/bm_error"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/auth_avatar"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_l"
+            android:contentDescription="@string/auth_choose_photo"
+            app:srcCompat="@drawable/ic_person" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/auth_choose_photo"
+            style="@style/Widget.BlazeMuzix.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/auth_choose_photo" />
+
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/auth_email_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_l"
-            android:hint="@string/auth_email"
-            app:boxCornerRadiusBottomEnd="16dp"
-            app:boxCornerRadiusBottomStart="16dp"
-            app:boxCornerRadiusTopEnd="16dp"
-            app:boxCornerRadiusTopStart="16dp">
+            android:layout_marginTop="@dimen/space_m"
+            android:hint="@string/auth_username">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/auth_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:hint="@string/auth_email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/auth_email"
@@ -75,17 +105,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/auth_password_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_m"
             android:hint="@string/auth_password"
-            app:endIconMode="password_toggle"
-            app:boxCornerRadiusBottomEnd="16dp"
-            app:boxCornerRadiusBottomStart="16dp"
-            app:boxCornerRadiusTopEnd="16dp"
-            app:boxCornerRadiusTopStart="16dp">
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/auth_password"
@@ -95,21 +120,36 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <CheckBox
-            android:id="@+id/auth_remember"
+        <TextView
+            android:id="@+id/auth_strength"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s"
-            android:checked="true"
-            android:text="@string/auth_remember" />
+            android:layout_marginTop="@dimen/space_xs"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:hint="@string/auth_confirm_password"
+            app:endIconMode="password_toggle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/auth_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/auth_submit"
             style="@style/Widget.BlazeMuzix.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_m"
-            android:text="@string/auth_sign_in" />
+            android:layout_marginTop="@dimen/space_l"
+            android:text="@string/auth_create_action" />
 
         <ProgressBar
             android:id="@+id/auth_progress"
@@ -118,14 +158,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/space_m"
             android:visibility="gone" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_l"
-            android:gravity="center"
-            android:text="@string/auth_or"
-            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/auth_google"
@@ -136,24 +168,5 @@
             android:text="@string/auth_continue_google"
             app:icon="@drawable/ic_person"
             app:iconGravity="textStart" />
-
-        <TextView
-            android:id="@+id/auth_forgot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_l"
-            android:padding="@dimen/space_s"
-            android:text="@string/auth_forgot_password"
-            android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
-            android:textColor="?attr/colorPrimary" />
-
-        <TextView
-            android:id="@+id/auth_create"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/space_s"
-            android:text="@string/auth_create_account"
-            android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
-            android:textColor="?attr/colorPrimary" />
     </LinearLayout>
 </ScrollView>

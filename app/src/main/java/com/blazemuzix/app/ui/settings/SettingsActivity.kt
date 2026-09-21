@@ -70,11 +70,15 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
             findPreference<Preference>("pref_account")?.apply {
-                summary = graph.googleAuth.current?.email ?: getString(R.string.auth_guest)
+                summary = graph.auth.current?.email ?: getString(R.string.auth_guest)
                 setOnPreferenceClickListener {
                     startActivity(android.content.Intent(requireContext(), com.blazemuzix.app.auth.AccountActivity::class.java))
                     true
                 }
+            }
+            findPreference<Preference>("pref_privacy")?.setOnPreferenceClickListener {
+                startActivity(android.content.Intent(requireContext(), com.blazemuzix.app.auth.AccountActivity::class.java))
+                true
             }
 
             findPreference<Preference>(AppPreferences.KEY_VERSION)?.summary = BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
@@ -117,12 +121,13 @@ class SettingsActivity : AppCompatActivity() {
                 val key = when (status.source) {
                     com.blazemuzix.app.data.models.Source.YOUTUBE -> "pref_provider_youtube"
                     com.blazemuzix.app.data.models.Source.SPOTIFY -> "pref_provider_spotify"
+                    com.blazemuzix.app.data.models.Source.CLOUD -> "pref_provider_cloud"
                     else -> "pref_provider_local"
                 }
                 findPreference<Preference>(key)?.summary = status.detail
             }
             findPreference<Preference>("pref_account")?.summary =
-                graph.googleAuth.current?.email ?: getString(R.string.auth_guest)
+                graph.auth.current?.email ?: getString(R.string.auth_guest)
         }
 
         override fun onPause() {

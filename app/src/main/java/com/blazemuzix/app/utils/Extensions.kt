@@ -66,7 +66,11 @@ fun Throwable.toErrorCopy(context: Context): ErrorCopy = when (this) {
     is ApiException.Timeout -> ErrorCopy(context.getString(R.string.state_error_title), context.getString(R.string.state_timeout_message), R.drawable.ic_error_outline)
     is ApiException.RateLimited -> ErrorCopy(context.getString(R.string.state_rate_limited_title), context.getString(R.string.state_rate_limited_message), R.drawable.ic_error_outline)
     is ApiException.Unauthorized -> ErrorCopy(context.getString(R.string.state_unauthorized_title), context.getString(R.string.state_unauthorized_message), R.drawable.ic_lock)
-    is ApiException.InvalidRequest -> ErrorCopy(context.getString(R.string.state_invalid_request_title), context.getString(R.string.state_invalid_request_message), R.drawable.ic_error_outline)
+    is ApiException.InvalidRequest -> ErrorCopy(
+        context.getString(R.string.state_invalid_request_title),
+        detail ?: context.getString(R.string.state_invalid_request_message),
+        R.drawable.ic_error_outline
+    )
     is ApiException.ServerError, is ApiException.Network, is ApiException.Parse -> ErrorCopy(
         context.getString(R.string.state_provider_unavailable_title), context.getString(R.string.state_provider_unavailable_message), R.drawable.ic_cloud_off
     )
@@ -83,6 +87,7 @@ fun MediaType.label(context: Context): String = when (this) {
     MediaType.PLAYLIST -> context.getString(R.string.type_playlist)
     MediaType.VIDEO -> context.getString(R.string.type_video)
     MediaType.SHORT -> context.getString(R.string.type_short)
+    MediaType.USER -> context.getString(R.string.type_user)
 }
 
 fun Source.color(context: Context): Int = androidx.core.content.ContextCompat.getColor(
@@ -90,6 +95,7 @@ fun Source.color(context: Context): Int = androidx.core.content.ContextCompat.ge
     when (this) {
         Source.YOUTUBE, Source.YOUTUBE_MUSIC -> R.color.source_youtube
         Source.SPOTIFY -> R.color.source_spotify
+        Source.CLOUD -> R.color.source_cloud
         Source.LOCAL -> R.color.source_local
     }
 )
@@ -102,7 +108,7 @@ object ExternalActions {
         val appIntent = when (item.source) {
             Source.SPOTIFY -> Intent(Intent.ACTION_VIEW, Uri.parse("spotify:${spotifyType(item.type)}:${item.providerId}")).setPackage("com.spotify.music")
             Source.YOUTUBE, Source.YOUTUBE_MUSIC -> Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage("com.google.android.youtube")
-            Source.LOCAL -> null
+            Source.CLOUD, Source.LOCAL -> null
         }
         if (appIntent != null && canResolve(context, appIntent)) {
             return start(context, appIntent)

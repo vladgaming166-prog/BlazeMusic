@@ -106,7 +106,7 @@ object Artwork {
         val key = (type.ordinal * 100_000 + cornerRadiusPx + if (isNight(context)) 50_000 else 0) * 10_000 + (sizePx / 8)
         placeholderCache[key]?.let { return it.constantState?.newDrawable()?.mutate() ?: it }
         val background = GradientDrawable().apply {
-            shape = if (type == MediaType.ARTIST) GradientDrawable.OVAL else GradientDrawable.RECTANGLE
+            shape = if (type == MediaType.ARTIST || type == MediaType.USER) GradientDrawable.OVAL else GradientDrawable.RECTANGLE
             cornerRadius = cornerRadiusPx.toFloat()
             setColor(ContextCompat.getColor(context, R.color.bm_artwork_placeholder))
         }
@@ -115,6 +115,7 @@ object Artwork {
             MediaType.ARTIST -> R.drawable.ic_person
             MediaType.PLAYLIST -> R.drawable.ic_playlist_play
             MediaType.VIDEO, MediaType.SHORT -> R.drawable.ic_video
+            MediaType.USER, MediaType.ARTIST -> R.drawable.ic_person
             MediaType.SONG -> R.drawable.ic_music_note
         }
         val icon = AppCompatResources.getDrawable(context, iconRes)?.mutate()?.also {

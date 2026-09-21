@@ -26,6 +26,8 @@ jobs:
       SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
       SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI || 'blazemuzix://callback' }}
       GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID || vars.GOOGLE_WEB_CLIENT_ID }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       HAS_RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 != '' }}
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx3g
 
@@ -57,6 +59,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Check configuration (non-blocking)
+        run: ./gradlew :app:checkConfig --stacktrace
+
       - name: Report provider configuration
         run: |
           flag() { if [ -n "$1" ]; then echo set; else echo MISSING; fi; }
@@ -64,6 +69,8 @@ jobs:
           echo "SPOTIFY_CLIENT_ID: $(flag "$SPOTIFY_CLIENT_ID")"
           echo "SPOTIFY_CLIENT_SECRET: $(flag "$SPOTIFY_CLIENT_SECRET")"
           echo "GOOGLE_WEB_CLIENT_ID: $(flag "$GOOGLE_WEB_CLIENT_ID")"
+          echo "SUPABASE_URL: $(flag "$SUPABASE_URL")"
+          echo "SUPABASE_ANON_KEY: $(flag "$SUPABASE_ANON_KEY")"
           echo "SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-blazemuzix://callback}"
           if [ "$HAS_RELEASE_KEYSTORE" = true ]; then echo "RELEASE_KEYSTORE: set"; else echo "RELEASE_KEYSTORE: missing (debug key will be used)"; fi
 

@@ -91,6 +91,10 @@
             android:label="@string/title_settings"
             android:parentActivityName=".ui.MainActivity" />
 
+        <activity android:name=".ui.cloud.UploadActivity" android:exported="false" android:label="@string/upload_title" />
+        <activity android:name=".ui.cloud.TrackActivity" android:exported="false" />
+        <activity android:name=".ui.cloud.ProfileActivity" android:exported="false" android:label="@string/profile_title" />
+
         <activity
             android:name=".ui.common.WebPlayerActivity"
             android:exported="false"

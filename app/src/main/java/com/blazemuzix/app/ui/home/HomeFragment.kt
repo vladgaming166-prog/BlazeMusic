@@ -49,6 +49,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), SectionAdapter.Listener {
         view.findViewById<View>(R.id.quick_songs).setOnClickListener { openLibrary(LibraryTab.SONGS) }
         view.findViewById<View>(R.id.quick_albums).setOnClickListener { openLibrary(LibraryTab.ALBUMS) }
         view.findViewById<View>(R.id.quick_artists).setOnClickListener { openLibrary(LibraryTab.ARTISTS) }
+        view.findViewById<View>(R.id.quick_upload).setOnClickListener {
+            startActivity(Intent(context, com.blazemuzix.app.ui.cloud.UploadActivity::class.java))
+        }
         view.findViewById<TextView>(R.id.home_greeting).text = greeting()
         view.findViewById<View>(R.id.home_settings).setOnClickListener {
             startActivity(Intent(context, SettingsActivity::class.java))
@@ -139,6 +142,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), SectionAdapter.Listener {
     }
 
     private fun greeting(): String {
+        val user = BlazeApp.graph(requireContext()).auth.current
+        val name = user?.displayName ?: user?.username
+        if (!name.isNullOrBlank()) return getString(R.string.home_welcome_back, name)
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         return getString(
             when {

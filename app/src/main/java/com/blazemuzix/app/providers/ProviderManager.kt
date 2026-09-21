@@ -4,6 +4,8 @@ import android.content.Context
 import com.blazemuzix.app.R
 import com.blazemuzix.app.auth.GoogleAuth
 import com.blazemuzix.app.auth.SpotifyAuth
+import com.blazemuzix.app.cloud.CloudConfig
+import com.blazemuzix.app.cloud.CloudRepository
 import com.blazemuzix.app.data.models.Source
 
 /**
@@ -14,9 +16,10 @@ class ProviderManager(
     private val context: Context,
     private val registry: ProviderRegistry,
     private val googleAuth: GoogleAuth,
-    private val spotifyAuth: SpotifyAuth
+    private val spotifyAuth: SpotifyAuth,
+    private val cloud: CloudRepository
 ) {
-    fun statuses(): List<ProviderStatus> = listOf(youtubeStatus(), spotifyStatus(), localStatus())
+    fun statuses(): List<ProviderStatus> = listOf(youtubeStatus(), spotifyStatus(), cloudStatus(), localStatus())
 
     fun youtubeStatus(): ProviderStatus {
         val configured = registry.youtube.isConfigured
@@ -57,11 +60,30 @@ class ProviderManager(
         )
     }
 
+    fun cloudStatus(): ProviderStatus {
+        val configured = CloudConfig.isConfigured
+        val signedIn = cloud.signedIn
+        return ProviderStatus(
+            source = Source.CLOUD,
+            displayName = context.getString(R.string.provider_cloud),
+            configured = configured,
+            signedIn = signedIn,
+            available = configured && registry.onlineEnabled,
+            capabilities = registry.cloud.capabilities,
+            detail = when {
+                !registry.onlineEnabled -> context.getString(R.string.provider_status_disabled)
+                signedIn -> context.getString(R.string.provider_status_cloud_signed_in)
+                configured -> context.getString(R.string.provider_status_cloud_ready)
+                else -> context.getString(R.string.provider_status_cloud_missing)
+            }
+        )
+    }
+
     fun localStatus(): ProviderStatus = ProviderStatus(
         source = Source.LOCAL,
         displayName = context.getString(R.string.provider_local),
         configured = true,
-        signedIn = googleAuth.current != null,
+        signedIn = googleAuth.current != null || cloud.signedIn,
         available = true,
         capabilities = registry.local.capabilities,
         detail = if (registry.local.hasPermission()) {

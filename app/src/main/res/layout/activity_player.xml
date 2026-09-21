@@ -178,6 +178,30 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_xl"
+        android:paddingRight="@dimen/space_xl">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/player_volume"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+            android:textColor="@color/white_70" />
+
+        <SeekBar
+            android:id="@+id/player_volume"
+            style="@style/Widget.BlazeMuzix.Seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="@string/player_volume" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_s"
         android:gravity="center_vertical"
         android:orientation="horizontal"

@@ -185,7 +185,8 @@ class WebPlayerActivity : AppCompatActivity() {
 
     private fun embedUrl(): String = when (item.source) {
         Source.SPOTIFY -> SpotifyProvider.embedUrl(item.type, item.providerId)
-        else -> YouTubeProvider.embedUrl(item.providerId, autoplay = !BlazeApp.graph(this).prefs.dataSaver)
+        Source.YOUTUBE, Source.YOUTUBE_MUSIC -> YouTubeProvider.embedUrl(item.providerId, autoplay = !BlazeApp.graph(this).prefs.dataSaver)
+        else -> item.externalUrl ?: item.playbackUri ?: "about:blank"
     }
 
     override fun onPause() {
