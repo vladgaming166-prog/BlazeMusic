@@ -1,6 +1,8 @@
 # BlazeMuzix
 
-**BlazeMuzix** is a lightweight, ad-free, Google-inspired music discovery app for Android. It combines the music already on your device with officially supported online catalogs (YouTube Data API v3 and Spotify Web API) behind one clean, green-accented interface — with a full player, background playback, lock-screen controls and an offline-capable library.
+**BlazeMuzix** is a lightweight, ad-free, Google-inspired **local music player** for Android. This version plays the music already stored on your device — no account, no internet connection and no API keys required — behind a clean, green-accented interface with a full player, background playback, lock-screen controls, playlists, favorites and a highly customisable appearance.
+
+> **Local-only release.** The `YouTubeProvider` / `SpotifyProvider` code remains in the repository behind the `MusicProvider` abstraction, but online providers are compiled out (`BuildConfig.ONLINE_PROVIDERS = false`). The app never shows "YouTube not configured" or "Spotify not configured" and works fully offline.
 
 - Package: `com.blazemuzix.app`
 - Minimum Android version: **4.4 KitKat (API 19)**
@@ -33,14 +35,16 @@
 
 | Area | What you get |
 | --- | --- |
-| **Home** | Recently played, "On this device", Trending on YouTube, YouTube music playlists, New releases on Spotify, Popular tracks — every section comes from a real provider and loads independently. |
-| **Search** | Cross-provider search (songs, albums, artists, playlists, videos) with filter chips, debounce, recent-search history (clearable), suggestions from history, and **Load more** pagination until the provider API is exhausted. |
-| **Blaze Shorts** | Vertical page-snapping feed of short-form music videos from the YouTube Data API. A single official YouTube embed player is moved between pages; nothing is preloaded. Save / favorite / share / open in YouTube. |
-| **Library** | Local music · Favorites · Recently played · Playlists · Saved · Downloads, tagged **LOCAL / DOWNLOADED / SAVED / ONLINE**. Fully available offline. |
-| **Player** | Mini player above the bottom navigation, full-screen player (artwork, seek bar, times, shuffle, repeat, favorite, queue), queue sheet with jump/remove. |
+| **Home** | Quick access (Shuffle all · Songs · Albums · Artists), Recently played, Recently added, Favorites, Albums, Artists — all from the device. With no music found it shows a **"No music found" → "Scan device"** empty state that requests the storage permission and rescans. |
+| **Local music** | MediaStore scan of every audio format the device can decode: title, artist, album, artwork, duration, folders. Play / pause / previous / next / seek / shuffle / repeat / favorite / add to playlist / queue. |
+| **Search** | Instant local search over songs, artists, albums and playlists with filter chips, recent-search history (clearable) and suggestions. No network access. |
+| **Library** | Songs · Albums · Artists · Playlists · Favorites · Recently played · Folders. Sort by Alphabetical / Artist / Album / Recently added / Recently played / Duration, plus an instant filter field for the current list. |
+| **Player** | Mini player above the bottom navigation, full-screen player (artwork, seek bar, times, shuffle, repeat, favorite, queue), queue sheet with jump/remove, optional artwork-tinted background. |
+| **Appearance** | Theme (Light / Dark / System), Accent color (6 palettes), Dynamic accent (Android 12+), Rounded corners, Compact lists, Show artwork / artist / album / duration / source badge, Mini player on/off, Background style, Navigation labels, Status bar and Navigation bar style (Android 5+), Reduced visual effects, Low-end device mode. Every switch changes the interface. |
+| **Player options** | Large / compact artwork, artwork-tinted background, and individual toggles for the seek bar, queue, shuffle, repeat and favorite buttons. No lyrics feature is shown because no lyrics source exists. |
 | **Background playback** | Foreground `MediaPlayer` service with `MediaSessionCompat`, MediaStyle notification (previous / play-pause / next / seek / artwork), headset and Bluetooth controls, audio focus handling, pause on unplug, automatic resource release when idle. |
-| **Offline mode** | Global offline banner; library, playlists, recently played and cached metadata keep working; online screens show a clear Offline state and retry when connectivity returns. |
-| **Settings** | Theme (Light / Dark / System), Autoplay, Shuffle, Repeat, Reduced animations, Data saver, Low-end device mode, cache size / limit / clear, local storage info, provider status, About, Version, Open-source licenses, Privacy. |
+| **Offline** | Everything works without a connection; the app never contacts a server. |
+| **Settings** | Appearance and Player sections above, Playback (Autoplay, Shuffle, Repeat), Performance, Storage (cache size / limit / clear, local music info), About, Version, Open-source licenses, Privacy. |
 | **Accessibility** | Content descriptions everywhere, 48dp touch targets, readable sizes, contrast-checked palettes, state never conveyed by color alone. |
 
 ## Supported Android versions
@@ -51,8 +55,9 @@ BlazeMuzix runs on Android 4.4.2 (API 19) through Android 16 (API 36) and newer.
 | --- | --- | --- | --- | --- |
 | Local music, library, player | Yes | Yes | Yes | Yes (`READ_MEDIA_AUDIO`) |
 | Background playback + notification controls | Yes (legacy `MediaSessionCompat`) | Yes | Yes (foreground service + channel) | Yes (`mediaPlayback` FGS type, notification permission) |
-| Online providers (TLS 1.2) | Yes (TLS 1.2 is force-enabled on API 19/20) | Yes | Yes | Yes |
-| Inline Blaze Shorts video | Falls back to "Open in YouTube" | Yes (unless low-end) | Yes | Yes |
+| Accent colors, rounded/compact UI, list options | Yes | Yes | Yes | Yes |
+| Status / navigation bar color options | Not available (setting is disabled with a note) | Yes | Yes | Yes |
+| Dynamic (wallpaper) accent | No | No | Android 12+ only | Yes |
 | Dark mode | Follows battery saver / manual | Manual / battery saver | Manual / battery saver | Follows system |
 
 Every AndroidX dependency was chosen at a version that still supports API 19 (`appcompat 1.6.1`, `core 1.13.1`, `recyclerview 1.3.2`, `fragment 1.6.2`, `lifecycle 2.6.2`, `preference 1.2.1`, `media 1.7.0`, `material 1.12.0`). Java 8+ library features are desugared with `desugar_jdk_libs`, and legacy multidex is enabled for API < 21.
@@ -177,6 +182,8 @@ Repository secrets used by the workflow (all optional):
 
 ## API configuration
 
+> Not needed for this local-only version: no key is required and the online providers are compiled out. The section below documents how credentials are wired for a future build with `ONLINE_PROVIDERS = true`.
+
 Secrets are **never** committed. They are read at build time, in this order of precedence, and exposed through `BuildConfig`:
 
 1. Environment variables (`YOUTUBE_API_KEY`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`) — this is how GitHub Actions secrets arrive
@@ -247,7 +254,7 @@ No location, contacts, camera, microphone or account permissions are requested.
 
 ## Provider capabilities and limitations
 
-BlazeMuzix tells you exactly what each source allows instead of pretending.
+In this release only **This device** is active. The online rows describe the dormant providers for reference.
 
 | Source | Search / browse | Playback in BlazeMuzix | Offline download | Notes |
 | --- | --- | --- | --- | --- |

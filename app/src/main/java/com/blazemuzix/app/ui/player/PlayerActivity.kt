@@ -97,6 +97,7 @@ class PlayerActivity : AppCompatActivity() {
         favorite.setOnClickListener { toggleFavorite() }
         queueButton.setOnClickListener { QueueSheet().show(supportFragmentManager, "queue") }
 
+        androidx.core.view.ViewCompat.setBackgroundTintList(playPause, android.content.res.ColorStateList.valueOf(Appearance.accentColor(this)))
         // Player customisation: every switch here maps to a real view.
         queueButton.visible(prefs.playerShowQueue)
         shuffle.visible(prefs.playerShowShuffle)

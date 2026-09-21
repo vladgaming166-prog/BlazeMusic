@@ -15,7 +15,7 @@
         android:id="@+id/state_progress"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:indeterminateTint="@color/bm_primary"
+        android:indeterminateTint="?attr/colorPrimary"
         android:visibility="gone" />
 
     <FrameLayout

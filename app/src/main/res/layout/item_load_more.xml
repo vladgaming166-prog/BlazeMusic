@@ -20,7 +20,7 @@
         android:layout_width="28dp"
         android:layout_height="28dp"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/bm_primary"
+        android:indeterminateTint="?attr/colorPrimary"
         android:visibility="gone" />
 
     <TextView

@@ -80,6 +80,10 @@ class DetailListFragment : Fragment(R.layout.fragment_detail_list), MediaAdapter
         state = StateView(view.findViewById(R.id.detail_state))
         adapter = MediaAdapter(SectionLayout.ROWS, this)
         list.layoutManager = LinearLayoutManager(context)
+        androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL).apply {
+            androidx.appcompat.content.res.AppCompatResources.getDrawable(context, R.drawable.divider_inset)?.let { setDrawable(it) }
+            list.addItemDecoration(this)
+        }
         list.adapter = adapter
 
         PlayerController.state.observe(viewLifecycleOwner) { adapter.nowPlayingId = it.current?.id }

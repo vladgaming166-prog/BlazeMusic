@@ -76,6 +76,17 @@ class MainActivity : AppCompatActivity(), Navigator {
             true
         }
         bottomNav.setOnItemReselectedListener { popDetails() }
+        run {
+            val accent = Appearance.accentColor(this)
+            val normal = Appearance.color(this, android.R.attr.textColorSecondary)
+            val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+            val tint = android.content.res.ColorStateList(states, intArrayOf(accent, normal))
+            bottomNav.itemIconTintList = tint
+            bottomNav.itemTextColor = tint
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                miniProgress.progressTintList = android.content.res.ColorStateList.valueOf(accent)
+            }
+        }
         bottomNav.labelVisibilityMode = when (prefs.navigationStyle) {
             com.blazemuzix.app.data.prefs.AppPreferences.NAV_SELECTED -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_SELECTED
             com.blazemuzix.app.data.prefs.AppPreferences.NAV_UNLABELED -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_UNLABELED

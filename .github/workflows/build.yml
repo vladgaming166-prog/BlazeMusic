@@ -21,10 +21,8 @@ jobs:
     timeout-minutes: 45
 
     env:
-      # Provider credentials come from repository secrets. They are optional:
-      # without them the app builds fine and shows "provider not configured".
-      # The YouTube key is a public API key (it ships inside the APK), so it may also be
-      # supplied as a repository *variable*; Spotify credentials must stay secrets.
+      # Optional provider credentials. This release is local-only (online providers are
+      # compiled out), so these can be left unset; they are kept for a future online build.
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY || vars.YOUTUBE_API_KEY }}
       SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
       SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
@@ -67,12 +65,6 @@ jobs:
           echo "KEYSTORE_PASSWORD=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> "$GITHUB_ENV"
           echo "KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> "$GITHUB_ENV"
           echo "KEY_PASSWORD=${{ secrets.RELEASE_KEY_PASSWORD }}" >> "$GITHUB_ENV"
-
-      - name: Report provider configuration (names only, values are never printed)
-        run: |
-          for name in YOUTUBE_API_KEY SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET; do
-            if [ -n "${!name}" ]; then echo "$name: set"; else echo "$name: MISSING (add it under Settings → Secrets and variables → Actions)"; fi
-          done
 
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace

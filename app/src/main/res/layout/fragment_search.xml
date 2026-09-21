@@ -172,7 +172,7 @@
             android:layout_height="28dp"
             android:layout_gravity="top|center_horizontal"
             android:layout_marginTop="@dimen/space_l"
-            android:indeterminateTint="@color/bm_primary"
+            android:indeterminateTint="?attr/colorPrimary"
             android:visibility="gone" />
     </FrameLayout>
 </LinearLayout>

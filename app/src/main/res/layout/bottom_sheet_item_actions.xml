@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
                 android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
-                android:textColor="@color/bm_primary" />
+                android:textColor="?attr/colorPrimary" />
         </LinearLayout>
     </LinearLayout>
 

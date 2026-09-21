@@ -93,6 +93,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         adapter = MediaAdapter(SectionLayout.ROWS, this).apply { showStorageTags = true }
         list.layoutManager = LinearLayoutManager(context)
         list.adapter = adapter
+        androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL).apply {
+            androidx.appcompat.content.res.AppCompatResources.getDrawable(context, R.drawable.divider_inset)?.let { setDrawable(it) }
+            list.addItemDecoration(this)
+        }
 
         val chips = view.findViewById<ChipGroup>(R.id.library_tabs)
         chips.check(chipIdFor(viewModel.tab))

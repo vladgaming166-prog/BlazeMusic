@@ -85,7 +85,7 @@
                 android:layout_marginLeft="6dp"
                 android:background="@color/transparent"
                 android:paddingLeft="0dp"
-                android:textColor="@color/bm_primary"
+                android:textColor="?attr/colorPrimary"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
