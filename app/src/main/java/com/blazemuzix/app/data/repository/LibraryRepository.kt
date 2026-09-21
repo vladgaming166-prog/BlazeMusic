@@ -9,6 +9,8 @@ import com.blazemuzix.app.data.db.BlazeDatabase
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_FAVORITES
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_PLAYLISTS
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_PLAYLIST_ITEMS
+import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_QUEUE
+import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_QUEUE_META
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_RECENT
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_SAVED
 import com.blazemuzix.app.data.db.BlazeDatabase.Companion.T_SEARCH_HISTORY
@@ -255,6 +257,114 @@ class LibraryRepository(private val db: BlazeDatabase) {
             ).use { readJsonColumn(it) }
         } catch (_: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun reorderPlaylist(playlistId: Long, from: Int, to: Int) = withContext(Dispatchers.IO) {
+        val items = playlistItems(playlistId).toMutableList()
+        if (from !in items.indices || to !in items.indices || from == to) return@withContext
+        val moved = items.removeAt(from)
+        items.add(to, moved)
+        val database = db.writableDatabase
+        database.beginTransaction()
+        try {
+            database.delete(T_PLAYLIST_ITEMS, "playlist_id = ?", arrayOf(playlistId.toString()))
+            items.forEachIndexed { index, item ->
+                database.insert(T_PLAYLIST_ITEMS, null, ContentValues().apply {
+                    put("playlist_id", playlistId)
+                    put("item_id", item.id)
+                    put("json", item.toJson().toString())
+                    put("position", index)
+                    put("added_at", System.currentTimeMillis())
+                })
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+        notifyChanged()
+    }
+
+    suspend fun removeFavorites(ids: Collection<String>) = withContext(Dispatchers.IO) {
+        ensureIds()
+        val database = db.writableDatabase
+        database.beginTransaction()
+        try {
+            for (id in ids) {
+                database.delete(T_FAVORITES, "item_id = ?", arrayOf(id))
+                favoriteIds.remove(id)
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+        notifyChanged()
+    }
+
+    suspend fun addAllToPlaylist(playlistId: Long, items: List<MediaItem>) = withContext(Dispatchers.IO) {
+        for (item in items) addToPlaylist(playlistId, item)
+    }
+
+    suspend fun createPlaylistWith(name: String, items: List<MediaItem>): Long {
+        val id = createPlaylist(name)
+        addAllToPlaylist(id, items)
+        return id
+    }
+
+    data class PersistedQueue(val items: List<MediaItem>, val index: Int, val shuffle: Boolean, val repeat: String)
+
+    fun persistQueue(items: List<MediaItem>, index: Int, shuffle: Boolean, repeat: String) {
+        val database = db.writableDatabase
+        database.beginTransaction()
+        try {
+            database.delete(T_QUEUE, null, null)
+            items.forEachIndexed { i, item ->
+                database.insert(T_QUEUE, null, ContentValues().apply {
+                    put("position", i)
+                    put("json", item.toJson().toString())
+                })
+            }
+            fun meta(k: String, v: String) {
+                database.insertWithOnConflict(
+                    T_QUEUE_META, null,
+                    ContentValues().apply { put("k", k); put("v", v) },
+                    SQLiteDatabase.CONFLICT_REPLACE
+                )
+            }
+            meta("index", index.toString())
+            meta("shuffle", shuffle.toString())
+            meta("repeat", repeat)
+            database.setTransactionSuccessful()
+        } catch (_: Exception) {
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    fun loadQueue(): PersistedQueue? = try {
+        val items = db.readableDatabase.query(T_QUEUE, arrayOf("json"), null, null, null, null, "position ASC")
+            .use { readJsonColumn(it) }
+        if (items.isEmpty()) null else {
+            val meta = HashMap<String, String>()
+            db.readableDatabase.query(T_QUEUE_META, arrayOf("k", "v"), null, null, null, null, null).use { c ->
+                while (c.moveToNext()) meta[c.getString(0)] = c.getString(1)
+            }
+            PersistedQueue(
+                items,
+                meta["index"]?.toIntOrNull() ?: 0,
+                meta["shuffle"] == "true",
+                meta["repeat"] ?: "off"
+            )
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    fun clearQueue() {
+        try {
+            db.writableDatabase.delete(T_QUEUE, null, null)
+            db.writableDatabase.delete(T_QUEUE_META, null, null)
+        } catch (_: Exception) {
         }
     }
 

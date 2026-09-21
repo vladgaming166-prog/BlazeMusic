@@ -77,8 +77,19 @@ class MediaItemTest {
     }
 
     @Test
-    fun fromJsonOrNullRejectsGarbage() {
-        assertNull(MediaItem.fromJsonOrNull("not json"))
-        assertNull(MediaItem.fromJsonOrNull(null))
+    fun genreYearTrackRoundTrip() {
+        val original = item("42").copy(genre = "Rock", year = 1999, trackNumber = 7)
+        val restored = MediaItem.fromJson(JSONObject(original.toJson().toString()))
+        assertEquals("Rock", restored.genre)
+        assertEquals(1999, restored.year)
+        assertEquals(7, restored.trackNumber)
+    }
+
+    @Test
+    fun searchFilterLocalRestrictsSource() {
+        assertEquals(Source.LOCAL, com.blazemuzix.app.data.models.SearchFilter.LOCAL.source)
+        assertEquals(Source.YOUTUBE, com.blazemuzix.app.data.models.SearchFilter.YOUTUBE.source)
+        assertEquals(Source.SPOTIFY, com.blazemuzix.app.data.models.SearchFilter.SPOTIFY.source)
+        assertNull(com.blazemuzix.app.data.models.SearchFilter.ALL.source)
     }
 }

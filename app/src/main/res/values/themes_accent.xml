@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Accent overlays applied at runtime (Appearance.apply). Green is the base theme. -->
+    <style name="ThemeOverlay.BlazeMuzix.Accent.Emerald" parent="">
+        <item name="colorPrimary">@color/accent_emerald</item>
+        <item name="colorPrimaryVariant">@color/accent_emerald_variant</item>
+        <item name="colorSecondary">@color/accent_emerald</item>
+        <item name="colorSecondaryVariant">@color/accent_emerald_variant</item>
+        <item name="colorAccent">@color/accent_emerald</item>
+        <item name="colorControlActivated">@color/accent_emerald</item>
+        <item name="colorOnPrimary">@color/accent_on_light</item>
+        <item name="colorOnSecondary">@color/accent_on_light</item>
+        <item name="bmAccentContainer">@color/accent_emerald_container</item>
+    </style>
+    <style name="ThemeOverlay.BlazeMuzix.Accent.Mint" parent="">
+        <item name="colorPrimary">@color/accent_mint</item>
+        <item name="colorPrimaryVariant">@color/accent_mint_variant</item>
+        <item name="colorSecondary">@color/accent_mint</item>
+        <item name="colorSecondaryVariant">@color/accent_mint_variant</item>
+        <item name="colorAccent">@color/accent_mint</item>
+        <item name="colorControlActivated">@color/accent_mint</item>
+        <item name="colorOnPrimary">@color/accent_on_light</item>
+        <item name="colorOnSecondary">@color/accent_on_light</item>
+        <item name="bmAccentContainer">@color/accent_mint_container</item>
+    </style>
+    <style name="ThemeOverlay.BlazeMuzix.Accent.Lime" parent="">
+        <item name="colorPrimary">@color/accent_lime</item>
+        <item name="colorPrimaryVariant">@color/accent_lime_variant</item>
+        <item name="colorSecondary">@color/accent_lime</item>
+        <item name="colorSecondaryVariant">@color/accent_lime_variant</item>
+        <item name="colorAccent">@color/accent_lime</item>
+        <item name="colorControlActivated">@color/accent_lime</item>
+        <item name="colorOnPrimary">@color/accent_on_light</item>
+        <item name="colorOnSecondary">@color/accent_on_light</item>
+        <item name="bmAccentContainer">@color/accent_lime_container</item>
+    </style>
     <style name="ThemeOverlay.BlazeMuzix.Accent.Teal" parent="">
         <item name="colorPrimary">@color/accent_teal</item>
         <item name="colorPrimaryVariant">@color/accent_teal_variant</item>

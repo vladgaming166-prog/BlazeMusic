@@ -26,7 +26,7 @@ fun secret(name: String): String =
 
 // Report which provider credentials reached the build (names only, never values) so a
 // misconfigured GitHub Secret is visible in the Actions log instead of only on the phone.
-val providerConfigSummary = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET")
+val providerConfigSummary = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET", "GOOGLE_WEB_CLIENT_ID")
     .joinToString(", ") { "$it=" + if (secret(it).isEmpty()) "missing" else "set" }
 logger.lifecycle("BlazeMuzix provider configuration: $providerConfigSummary")
 
@@ -45,8 +45,8 @@ android {
         // has been selected so that it still supports API 19.
         minSdk = 19
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 200
+        versionName = "2.0.0"
 
         // Legacy multidex is required for API < 21 because the debug build easily
         // exceeds the 65k method limit.
@@ -55,10 +55,14 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         // Local-only release: online providers stay in the code base but are not registered.
-        buildConfigField("boolean", "ONLINE_PROVIDERS", "false")
+        buildConfigField("boolean", "ONLINE_PROVIDERS", "true")
         buildConfigField("String", "YOUTUBE_API_KEY", quoted(secret("YOUTUBE_API_KEY")))
         buildConfigField("String", "SPOTIFY_CLIENT_ID", quoted(secret("SPOTIFY_CLIENT_ID")))
         buildConfigField("String", "SPOTIFY_CLIENT_SECRET", quoted(secret("SPOTIFY_CLIENT_SECRET")))
+        // Public OAuth client id for Sign in with Google (Web application type). Empty = Google Sign-In still
+        // requests profile/email but cannot mint an ID token. Never put a client *secret* here.
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", quoted(secret("GOOGLE_WEB_CLIENT_ID")))
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI", quoted(secret("SPOTIFY_REDIRECT_URI").ifEmpty { "blazemuzix://callback" }))
 
         resourceConfigurations += listOf("en")
     }
@@ -149,6 +153,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.6.2")
     implementation("androidx.media:media:1.7.0")
     implementation("androidx.multidex:multidex:2.0.1")
+
+    // Official Google Sign-In. 20.7.0 is the last play-services-auth line that still
+    // supports minSdk 19; Credential Manager 1.6+ raised minSdk to 23.
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     // --- Material Components (1.12.0 is the last release supporting API 19) ---
     implementation("com.google.android.material:material:1.12.0")

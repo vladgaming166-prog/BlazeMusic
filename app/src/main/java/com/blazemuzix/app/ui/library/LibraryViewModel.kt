@@ -17,7 +17,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-enum class LibraryTab { SONGS, ALBUMS, ARTISTS, PLAYLISTS, FAVORITES, RECENT, FOLDERS }
+enum class LibraryTab { SONGS, ALBUMS, ARTISTS, PLAYLISTS, FAVORITES, RECENT, FOLDERS, DOWNLOADS, OFFLINE }
 
 class LibraryViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -82,6 +82,8 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
                     LibraryTab.FAVORITES -> graph.library.favorites()
                     LibraryTab.RECENT -> graph.library.recentlyPlayed()
                     LibraryTab.FOLDERS -> graph.localProvider.folders()
+                    LibraryTab.DOWNLOADS -> graph.localProvider.downloads()
+                    LibraryTab.OFFLINE -> graph.localProvider.allSongs()
                 }
                 publish()
             } catch (e: CancellationException) {

@@ -87,6 +87,7 @@ class MediaAdapter(
     interface Listener {
         fun onItemClick(item: MediaItem, position: Int)
         fun onItemMore(item: MediaItem) {}
+        fun onItemLongClick(item: MediaItem): Boolean = false
         fun onLoadMore() {}
     }
 
@@ -102,6 +103,23 @@ class MediaAdapter(
 
     /** When true, rows show LOCAL / DOWNLOADED / SAVED / ONLINE storage tags. */
     var showStorageTags: Boolean = false
+
+    /** When true, card items fill the grid cell instead of a fixed width. */
+    var fillParent: Boolean = false
+
+    var selectionMode: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            if (!value) selectedIds = emptySet()
+            notifyDataSetChanged()
+        }
+
+    var selectedIds: Set<String> = emptySet()
+        set(value) {
+            field = value
+            notifyItemRangeChanged(0, itemCount, PAYLOAD_SELECTED)
+        }
 
     private var options: DisplayOptions? = null
 
@@ -137,8 +155,8 @@ class MediaAdapter(
             is ListEntry.Header -> (holder as HeaderHolder).bind(entry)
             is ListEntry.LoadMore -> (holder as LoadMoreHolder).bind(entry)
             is ListEntry.Media -> when (holder) {
-                is RowHolder -> holder.bind(entry.item, entry.item.id == nowPlayingId, showStorageTags, options(holder.itemView.context))
-                is CardHolder -> holder.bind(entry.item, options(holder.itemView.context))
+                is RowHolder -> holder.bind(entry.item, entry.item.id == nowPlayingId, showStorageTags, options(holder.itemView.context), selectionMode, entry.item.id in selectedIds)
+                is CardHolder -> holder.bind(entry.item, options(holder.itemView.context), fillParent, selectionMode, entry.item.id in selectedIds)
             }
         }
     }
@@ -147,6 +165,11 @@ class MediaAdapter(
         if (payloads.contains(PAYLOAD_PLAYING) && holder is RowHolder) {
             val entry = getItem(position) as? ListEntry.Media ?: return
             holder.setPlaying(entry.item.id == nowPlayingId)
+        } else if (payloads.contains(PAYLOAD_SELECTED)) {
+            val entry = getItem(position) as? ListEntry.Media ?: return
+            val selected = entry.item.id in selectedIds
+            holder.itemView.isSelected = selected && selectionMode
+            holder.itemView.alpha = if (selectionMode && !selected) 0.72f else 1f
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
@@ -195,10 +218,11 @@ class MediaAdapter(
 
         init {
             view.setOnClickListener { item?.let { listener.onItemClick(it, bindingAdapterPosition) } }
+            view.setOnLongClickListener { item?.let { listener.onItemLongClick(it) } ?: false }
             more.setOnClickListener { item?.let { listener.onItemMore(it) } }
         }
 
-        fun bind(item: MediaItem, isPlaying: Boolean, showStorageTags: Boolean, options: DisplayOptions) {
+        fun bind(item: MediaItem, isPlaying: Boolean, showStorageTags: Boolean, options: DisplayOptions, selectionMode: Boolean = false, selected: Boolean = false) {
             this.item = item
             val context = itemView.context
             title.text = item.title
@@ -230,7 +254,10 @@ class MediaAdapter(
             tag.text = tagText
             if (options.showArtwork) Artwork.load(artwork, item, artSize, itemView.dp(options.artworkRadiusDp)) else Artwork.clear(artwork)
             artwork.contentDescription = context.getString(R.string.cd_artwork, item.title)
-            setPlaying(isPlaying)
+            setPlaying(isPlaying && !selectionMode)
+            more.visible(!selectionMode)
+            itemView.isSelected = selected && selectionMode
+            itemView.alpha = if (selectionMode && !selected) 0.72f else 1f
             itemView.contentDescription = "${item.title}, ${item.artist}, ${item.source.label}"
         }
 
@@ -260,10 +287,10 @@ class MediaAdapter(
 
         init {
             view.setOnClickListener { item?.let { listener.onItemClick(it, bindingAdapterPosition) } }
-            view.setOnLongClickListener { item?.let { listener.onItemMore(it) }; true }
+            view.setOnLongClickListener { item?.let { if (listener.onItemLongClick(it)) true else { listener.onItemMore(it); true } } ?: true }
         }
 
-        fun bind(item: MediaItem, options: DisplayOptions) {
+        fun bind(item: MediaItem, options: DisplayOptions, fillParent: Boolean = false, selectionMode: Boolean = false, selected: Boolean = false) {
             this.item = item
             title.text = item.title
             val base = when (item.type) {
@@ -284,12 +311,14 @@ class MediaAdapter(
             badge.visible(badgeText != null)
             badge.text = badgeText
             val size = if (wide) itemView.dp(220) else itemView.dp(if (options.compact) 124 else 148)
-            if (!wide && artwork.layoutParams.width != size) {
+            if (!wide && !fillParent && artwork.layoutParams.width != size) {
                 (artwork.parent as? View)?.let { frame -> frame.layoutParams = frame.layoutParams.apply { width = size; height = size } }
                 itemView.layoutParams = itemView.layoutParams.apply { width = size }
             }
             Artwork.load(artwork, item, size, itemView.dp(options.cardRadiusDp))
             artwork.contentDescription = itemView.context.getString(R.string.cd_artwork, item.title)
+            itemView.isSelected = selected && selectionMode
+            itemView.alpha = if (selectionMode && !selected) 0.72f else 1f
             itemView.contentDescription = "${item.title}, ${item.artist}, ${item.source.label}"
         }
     }
@@ -301,6 +330,7 @@ class MediaAdapter(
         const val TYPE_WIDE_CARD = 3
         const val TYPE_LOAD_MORE = 4
         private const val PAYLOAD_PLAYING = "playing"
+        private const val PAYLOAD_SELECTED = "selected"
 
         val DIFF = object : DiffUtil.ItemCallback<ListEntry>() {
             override fun areItemsTheSame(oldItem: ListEntry, newItem: ListEntry) = oldItem.key == newItem.key

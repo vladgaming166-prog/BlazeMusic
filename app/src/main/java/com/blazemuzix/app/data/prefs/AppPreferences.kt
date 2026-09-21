@@ -85,6 +85,13 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_NOTIF_ASKED, false)
         set(value) = prefs.edit().putBoolean(KEY_NOTIF_ASKED, value).apply()
 
+    var welcomeCompleted: Boolean
+        get() = prefs.getBoolean(KEY_WELCOME, false)
+        set(value) = prefs.edit().putBoolean(KEY_WELCOME, value).apply()
+
+    val libraryStyle: String get() = prefs.getString(KEY_LIBRARY_STYLE, STYLE_LIST) ?: STYLE_LIST
+    val performanceMode: Boolean get() = lowEndMode
+
     fun ensureDefaults() {
         if (!prefs.contains(KEY_LOW_END)) prefs.edit().putBoolean(KEY_LOW_END, deviceLowEnd).apply()
         if (!prefs.contains(KEY_REDUCED_ANIMATIONS)) prefs.edit().putBoolean(KEY_REDUCED_ANIMATIONS, deviceLowEnd).apply()
@@ -130,6 +137,11 @@ class AppPreferences(context: Context) {
         const val KEY_PRIVACY = "pref_privacy"
         private const val KEY_LIBRARY_TAB = "library_tab"
         private const val KEY_NOTIF_ASKED = "notif_asked"
+        private const val KEY_WELCOME = "welcome_completed"
+        const val KEY_LIBRARY_STYLE = "pref_library_style"
+        const val KEY_PERFORMANCE = "pref_low_end_mode"
+        const val STYLE_LIST = "list"
+        const val STYLE_GRID = "grid"
 
         const val KEY_ACCENT = "pref_accent"
         const val KEY_DYNAMIC_ACCENT = "pref_dynamic_accent"
@@ -159,10 +171,14 @@ class AppPreferences(context: Context) {
             KEY_THEME, KEY_ACCENT, KEY_DYNAMIC_ACCENT, KEY_ROUNDED_UI, KEY_COMPACT, KEY_SHOW_ARTWORK, KEY_SHOW_ARTIST,
             KEY_SHOW_ALBUM, KEY_SHOW_DURATION, KEY_SHOW_BADGE, KEY_MINI_PLAYER, KEY_BACKGROUND_STYLE, KEY_NAV_STYLE,
             KEY_STATUS_BAR, KEY_NAV_BAR, KEY_REDUCED_ANIMATIONS, KEY_LOW_END, KEY_PLAYER_LARGE_ART,
-            KEY_PLAYER_ART_BACKGROUND, KEY_PLAYER_QUEUE, KEY_PLAYER_SHUFFLE, KEY_PLAYER_REPEAT, KEY_PLAYER_FAVORITE, KEY_PLAYER_SEEK
+            KEY_PLAYER_ART_BACKGROUND, KEY_PLAYER_QUEUE, KEY_PLAYER_SHUFFLE, KEY_PLAYER_REPEAT, KEY_PLAYER_FAVORITE, KEY_PLAYER_SEEK,
+            KEY_LIBRARY_STYLE
         )
 
         const val ACCENT_GREEN = "green"
+        const val ACCENT_EMERALD = "emerald"
+        const val ACCENT_MINT = "mint"
+        const val ACCENT_LIME = "lime"
         const val ACCENT_TEAL = "teal"
         const val ACCENT_BLUE = "blue"
         const val ACCENT_PURPLE = "purple"

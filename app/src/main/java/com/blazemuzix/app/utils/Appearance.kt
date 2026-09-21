@@ -61,6 +61,9 @@ object Appearance {
     }
 
     fun accentOverlay(accent: String): Int? = when (accent) {
+        AppPreferences.ACCENT_EMERALD -> R.style.ThemeOverlay_BlazeMuzix_Accent_Emerald
+        AppPreferences.ACCENT_MINT -> R.style.ThemeOverlay_BlazeMuzix_Accent_Mint
+        AppPreferences.ACCENT_LIME -> R.style.ThemeOverlay_BlazeMuzix_Accent_Lime
         AppPreferences.ACCENT_TEAL -> R.style.ThemeOverlay_BlazeMuzix_Accent_Teal
         AppPreferences.ACCENT_BLUE -> R.style.ThemeOverlay_BlazeMuzix_Accent_Blue
         AppPreferences.ACCENT_PURPLE -> R.style.ThemeOverlay_BlazeMuzix_Accent_Purple

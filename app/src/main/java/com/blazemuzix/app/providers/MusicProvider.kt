@@ -26,6 +26,9 @@ interface MusicProvider {
     /** Which result types [search] can return. */
     val supportedSearchTypes: Set<MediaType>
 
+    /** Honest capability flags so the UI can hide unsupported actions. */
+    val capabilities: Set<ProviderCapability> get() = emptySet()
+
     suspend fun search(query: String, type: MediaType?, pageToken: String?): Page<MediaItem>
 
     /** Home screen sections; each provider decides what it can legitimately offer. */

@@ -53,6 +53,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), SectionAdapter.Listener {
         view.findViewById<View>(R.id.home_settings).setOnClickListener {
             startActivity(Intent(context, SettingsActivity::class.java))
         }
+        view.findViewById<View>(R.id.home_account).setOnClickListener {
+            startActivity(Intent(context, com.blazemuzix.app.auth.AccountActivity::class.java))
+        }
         list = view.findViewById(R.id.home_list)
         refresh = view.findViewById(R.id.home_refresh)
         state = StateView(view.findViewById(R.id.home_state))

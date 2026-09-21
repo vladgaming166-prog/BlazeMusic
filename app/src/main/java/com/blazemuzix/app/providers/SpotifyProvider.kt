@@ -33,13 +33,20 @@ class SpotifyProvider(
     private val http: HttpClient,
     private val clientId: String,
     private val clientSecret: String,
+    private val userAccessToken: suspend () -> String? = { null },
+    private val signedIn: () -> Boolean = { false },
     private val market: () -> String = { Locale.getDefault().country.ifEmpty { "US" } }
 ) : MusicProvider {
 
     override val source = Source.SPOTIFY
     override val displayName = "Spotify"
-    override val isConfigured: Boolean get() = clientId.isNotBlank() && clientSecret.isNotBlank()
+    /** Catalog works with a user PKCE token *or* (optional) client-credentials secret. */
+    override val isConfigured: Boolean get() = clientId.isNotBlank() && (signedIn() || clientSecret.isNotBlank())
     override val supportedSearchTypes = setOf(MediaType.SONG, MediaType.ALBUM, MediaType.ARTIST, MediaType.PLAYLIST)
+    override val capabilities = setOf(
+        ProviderCapability.SEARCH, ProviderCapability.METADATA, ProviderCapability.PLAYBACK,
+        ProviderCapability.ARTISTS, ProviderCapability.ALBUMS, ProviderCapability.PLAYLISTS, ProviderCapability.LIKES
+    )
 
     private val tokenMutex = Mutex()
     @Volatile private var accessToken: String? = null
@@ -50,8 +57,11 @@ class SpotifyProvider(
     }
 
     private suspend fun token(): String {
+        userAccessToken()?.takeIf { it.isNotBlank() }?.let { return it }
+        if (clientSecret.isBlank()) throw ApiException.NotConfigured(displayName)
         accessToken?.let { if (System.currentTimeMillis() < tokenExpiresAt - 30_000) return it }
         return tokenMutex.withLock {
+            userAccessToken()?.takeIf { it.isNotBlank() }?.let { return@withLock it }
             accessToken?.let { if (System.currentTimeMillis() < tokenExpiresAt - 30_000) return@withLock it }
             val basic = Base64.encodeToString("$clientId:$clientSecret".toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
             val json = try {
@@ -113,7 +123,15 @@ class SpotifyProvider(
         return coroutineScope {
             val releases = async { runCatching { newReleases() }.getOrDefault(emptyList()) }
             val popular = async { runCatching { popularTracks() }.getOrDefault(emptyList()) }
+            val mine = async { if (signedIn()) runCatching { myPlaylists() }.getOrDefault(emptyList()) else emptyList() }
+            val top = async { if (signedIn()) runCatching { myTopTracks() }.getOrDefault(emptyList()) else emptyList() }
             listOfNotNull(
+                top.await().takeIf { it.isNotEmpty() }?.let {
+                    Section("sp_top", R.string.section_your_top_tracks, it, SectionLayout.ROWS, Source.SPOTIFY)
+                },
+                mine.await().takeIf { it.isNotEmpty() }?.let {
+                    Section("sp_mine", R.string.section_your_playlists, it, SectionLayout.CARDS, Source.SPOTIFY)
+                },
                 releases.await().takeIf { it.isNotEmpty() }?.let {
                     Section("sp_new_releases", R.string.section_new_releases, it, SectionLayout.CARDS, Source.SPOTIFY)
                 },
@@ -127,6 +145,16 @@ class SpotifyProvider(
     private suspend fun newReleases(): List<MediaItem> {
         val json = api("browse/new-releases", mapOf("limit" to "20", "country" to market()), ResponseCache.TTL_LONG)
         return parseItems(json.optJSONObject("albums")?.optJSONArray("items"), "albums")
+    }
+
+    private suspend fun myPlaylists(): List<MediaItem> {
+        val json = api("me/playlists", mapOf("limit" to "20"), ResponseCache.TTL_MEDIUM)
+        return parseItems(json.optJSONArray("items"), "playlists")
+    }
+
+    private suspend fun myTopTracks(): List<MediaItem> {
+        val json = api("me/top/tracks", mapOf("limit" to "20", "time_range" to "medium_term"), ResponseCache.TTL_LONG)
+        return parseItems(json.optJSONArray("items"), "tracks")
     }
 
     private suspend fun popularTracks(): List<MediaItem> {

@@ -10,9 +10,11 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blazemuzix.app.BlazeApp
@@ -34,6 +36,7 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import java.util.LinkedHashSet
 
 class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listener {
 
@@ -51,7 +54,12 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
     private lateinit var filterRow: View
     private lateinit var filterField: EditText
     private lateinit var filterClear: View
+    private lateinit var selectButton: View
+    private lateinit var bulkBar: View
     private var permanentlyDenied = false
+    private var selectionMode = false
+    private val selected = LinkedHashSet<String>()
+    private var usingGrid = false
 
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
@@ -61,6 +69,10 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                 !shouldShowRequestPermissionRationale(BlazeApp.graph(requireContext()).localProvider.requiredPermission)
             viewModel.load()
         }
+    }
+
+    private val deleteLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        viewModel.rescan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,6 +90,8 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         filterRow = view.findViewById(R.id.library_filter_row)
         filterField = view.findViewById(R.id.library_filter)
         filterClear = view.findViewById(R.id.library_filter_clear)
+        selectButton = view.findViewById(R.id.library_select)
+        bulkBar = view.findViewById(R.id.library_bulk)
         filterField.setText(viewModel.filter)
         filterField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -89,14 +103,13 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         })
         filterClear.setOnClickListener { filterField.setText("") }
         view.findViewById<View>(R.id.library_sort).setOnClickListener { showSortDialog() }
+        selectButton.setOnClickListener { toggleSelectionMode() }
+        view.findViewById<View>(R.id.library_bulk_queue).setOnClickListener { bulkQueue() }
+        view.findViewById<View>(R.id.library_bulk_playlist).setOnClickListener { bulkPlaylist() }
+        view.findViewById<View>(R.id.library_bulk_unfavorite).setOnClickListener { bulkUnfavorite() }
+        view.findViewById<View>(R.id.library_bulk_delete).setOnClickListener { bulkDelete() }
 
-        adapter = MediaAdapter(SectionLayout.ROWS, this).apply { showStorageTags = true }
-        list.layoutManager = LinearLayoutManager(context)
-        list.adapter = adapter
-        androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL).apply {
-            androidx.appcompat.content.res.AppCompatResources.getDrawable(context, R.drawable.divider_inset)?.let { setDrawable(it) }
-            list.addItemDecoration(this)
-        }
+        rebuildAdapter()
 
         val chips = view.findViewById<ChipGroup>(R.id.library_tabs)
         chips.check(chipIdFor(viewModel.tab))
@@ -108,6 +121,8 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                 R.id.tab_favorites -> LibraryTab.FAVORITES
                 R.id.tab_recent -> LibraryTab.RECENT
                 R.id.tab_folders -> LibraryTab.FOLDERS
+                R.id.tab_downloads -> LibraryTab.DOWNLOADS
+                R.id.tab_offline -> LibraryTab.OFFLINE
                 else -> LibraryTab.SONGS
             }
             viewModel.selectTab(tab)
@@ -126,8 +141,16 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
-        if (!hidden && viewModel.syncTabFromPrefs()) {
-            view?.findViewById<ChipGroup>(R.id.library_tabs)?.check(chipIdFor(viewModel.tab))
+        if (!hidden) {
+            val grid = BlazeApp.graph(requireContext()).prefs.libraryStyle == AppPreferences.STYLE_GRID
+            if (grid != usingGrid) {
+                val items = adapter.mediaItems()
+                rebuildAdapter()
+                adapter.submitItems(items)
+            }
+            if (viewModel.syncTabFromPrefs()) {
+                view?.findViewById<ChipGroup>(R.id.library_tabs)?.check(chipIdFor(viewModel.tab))
+            }
         }
     }
 
@@ -139,6 +162,27 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
         LibraryTab.FAVORITES -> R.id.tab_favorites
         LibraryTab.RECENT -> R.id.tab_recent
         LibraryTab.FOLDERS -> R.id.tab_folders
+        LibraryTab.DOWNLOADS -> R.id.tab_downloads
+        LibraryTab.OFFLINE -> R.id.tab_offline
+    }
+
+    private fun rebuildAdapter() {
+        val grid = BlazeApp.graph(requireContext()).prefs.libraryStyle == AppPreferences.STYLE_GRID
+        usingGrid = grid
+        adapter = MediaAdapter(if (grid) SectionLayout.CARDS else SectionLayout.ROWS, this).apply {
+            showStorageTags = true
+            fillParent = grid
+        }
+        applySelectionToAdapter()
+        list.layoutManager = if (grid) GridLayoutManager(requireContext(), 2) else LinearLayoutManager(requireContext())
+        list.adapter = adapter
+        if (!grid && list.itemDecorationCount == 0) {
+            androidx.recyclerview.widget.DividerItemDecoration(requireContext(), androidx.recyclerview.widget.DividerItemDecoration.VERTICAL).apply {
+                androidx.appcompat.content.res.AppCompatResources.getDrawable(requireContext(), R.drawable.divider_inset)?.let { setDrawable(it) }
+                list.addItemDecoration(this)
+            }
+        }
+        while (grid && list.itemDecorationCount > 0) list.removeItemDecorationAt(0)
     }
 
     private fun showSortDialog() {
@@ -168,10 +212,15 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
     private fun render(uiState: UiState<List<MediaItem>>) {
         val tab = viewModel.tab
         val local = BlazeApp.graph(requireContext()).localProvider
-        val isLocalTab = tab == LibraryTab.SONGS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS || tab == LibraryTab.FOLDERS
+        val isLocalTab = tab == LibraryTab.SONGS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS ||
+            tab == LibraryTab.FOLDERS || tab == LibraryTab.DOWNLOADS || tab == LibraryTab.OFFLINE
         addButton.visible(tab == LibraryTab.PLAYLISTS)
         rescanButton.visible(isLocalTab)
-        notice.visible(false)
+        notice.visible(tab == LibraryTab.DOWNLOADS)
+        val selectable = tab == LibraryTab.SONGS || tab == LibraryTab.FAVORITES || tab == LibraryTab.RECENT ||
+            tab == LibraryTab.DOWNLOADS || tab == LibraryTab.OFFLINE
+        selectButton.visible(selectable)
+        if (selectionMode && !selectable) exitSelection()
 
         if (isLocalTab && !local.hasPermission()) {
             list.visible(false)
@@ -204,8 +253,9 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                 toolbar.visible(true)
                 val collections = tab == LibraryTab.PLAYLISTS || tab == LibraryTab.ALBUMS || tab == LibraryTab.ARTISTS || tab == LibraryTab.FOLDERS
                 count.text = if (collections) resources.getString(R.string.items_count, items.size) else resources.getString(R.string.playlist_track_count, items.size)
-                playAll.visible(playable > 0)
-                shuffle.visible(playable > 1)
+                if (selectionMode) count.text = getString(R.string.library_selected, selected.size)
+                playAll.visible(playable > 0 && !selectionMode)
+                shuffle.visible(playable > 1 && !selectionMode)
             }
             is UiState.Empty -> {
                 toolbar.visible(false)
@@ -226,9 +276,11 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
                     LibraryTab.RECENT -> Triple(R.string.library_recent_empty_title, R.string.library_recent_empty_message, R.drawable.ic_history)
                     LibraryTab.PLAYLISTS -> Triple(R.string.library_playlists_empty_title, R.string.library_playlists_empty_message, R.drawable.ic_playlist_play)
                     LibraryTab.FOLDERS -> Triple(R.string.library_folders_empty_title, R.string.library_folders_empty_message, R.drawable.ic_folder)
+                    LibraryTab.DOWNLOADS -> Triple(R.string.library_downloads_empty_title, R.string.library_downloads_empty_message, R.drawable.ic_download)
+                    LibraryTab.OFFLINE -> Triple(R.string.library_local_empty_title, R.string.library_local_empty_message, R.drawable.ic_phone)
                 }
                 val action = when (tab) {
-                    LibraryTab.SONGS, LibraryTab.ALBUMS, LibraryTab.ARTISTS, LibraryTab.FOLDERS -> getString(R.string.action_rescan)
+                    LibraryTab.SONGS, LibraryTab.ALBUMS, LibraryTab.ARTISTS, LibraryTab.FOLDERS, LibraryTab.DOWNLOADS, LibraryTab.OFFLINE -> getString(R.string.action_rescan)
                     LibraryTab.PLAYLISTS -> getString(R.string.action_new_playlist)
                     else -> null
                 }
@@ -280,10 +332,24 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
     }
 
     override fun onItemClick(item: MediaItem, position: Int) {
+        if (selectionMode) {
+            toggleSelected(item)
+            return
+        }
         ItemActions.primary(requireActivity(), item, adapter.mediaItems())
     }
 
+    override fun onItemLongClick(item: MediaItem): Boolean {
+        if (!selectionMode) toggleSelectionMode()
+        toggleSelected(item)
+        return true
+    }
+
     override fun onItemMore(item: MediaItem) {
+        if (selectionMode) {
+            toggleSelected(item)
+            return
+        }
         val extras = ArrayList<ItemActionsSheet.ExtraAction>()
         LibraryViewModel.playlistIdOf(item)?.let { playlistId ->
             extras.add(ItemActionsSheet.ExtraAction(R.drawable.ic_delete, getString(R.string.action_delete)) {
@@ -300,5 +366,89 @@ class LibraryFragment : Fragment(R.layout.fragment_library), MediaAdapter.Listen
             })
         }
         ItemActionsSheet.show(parentFragmentManager, item, adapter.mediaItems(), extras)
+    }
+
+    private fun toggleSelectionMode() {
+        if (selectionMode) exitSelection() else {
+            selectionMode = true
+            applySelectionToAdapter()
+            bulkBar.visible(true)
+        }
+    }
+
+    private fun exitSelection() {
+        selectionMode = false
+        selected.clear()
+        applySelectionToAdapter()
+        bulkBar.visible(false)
+        viewModel.state.value?.let { if (it is UiState.Success) render(it) }
+    }
+
+    private fun applySelectionToAdapter() {
+        if (!::adapter.isInitialized) return
+        adapter.selectionMode = selectionMode
+        adapter.selectedIds = selected
+    }
+
+    private fun toggleSelected(item: MediaItem) {
+        if (!selected.add(item.id)) selected.remove(item.id)
+        applySelectionToAdapter()
+        count.text = getString(R.string.library_selected, selected.size)
+        if (selected.isEmpty()) exitSelection()
+    }
+
+    private fun selectedItems(): List<MediaItem> = adapter.mediaItems().filter { it.id in selected }
+
+    private fun bulkQueue() {
+        selectedItems().filter { it.canPlayDirect }.forEach { PlayerController.addToQueue(requireContext(), it) }
+        requireContext().toast(R.string.added_to_queue)
+        exitSelection()
+    }
+
+    private fun bulkPlaylist() {
+        val items = selectedItems()
+        if (items.isEmpty()) return
+        ItemActions.newPlaylistDialog(requireActivity()) { id ->
+            lifecycleScope.launch {
+                BlazeApp.graph(requireContext()).library.addAllToPlaylist(id, items)
+                context?.toast(R.string.playlist_created)
+            }
+        }
+        exitSelection()
+    }
+
+    private fun bulkUnfavorite() {
+        lifecycleScope.launch {
+            BlazeApp.graph(requireContext()).library.removeFavorites(selected)
+            context?.toast(R.string.favorite_removed)
+            exitSelection()
+        }
+    }
+
+    private fun bulkDelete() {
+        val items = selectedItems().filter { it.source == com.blazemuzix.app.data.models.Source.LOCAL && it.canPlayDirect }
+        if (items.isEmpty()) {
+            requireContext().toast(R.string.delete_local_unavailable)
+            return
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(getString(R.string.delete_local_confirm, items.size))
+            .setPositiveButton(R.string.action_delete) { _, _ ->
+                val outcome = BlazeApp.graph(requireContext()).localProvider.requestDelete(items)
+                val pending = outcome.pendingIntent
+                if (pending != null) {
+                    try {
+                        deleteLauncher.launch(IntentSenderRequest.Builder(pending).build())
+                    } catch (_: Exception) {
+                        requireContext().toast(R.string.delete_local_unavailable)
+                    }
+                } else {
+                    requireContext().toast(getString(R.string.delete_local_done, outcome.deleted))
+                    viewModel.rescan()
+                }
+                exitSelection()
+            }
+            .setNegativeButton(R.string.action_cancel, null)
+            .show()
     }
 }

@@ -24,6 +24,8 @@ import com.blazemuzix.app.ui.library.DetailListFragment
 import com.blazemuzix.app.ui.library.LibraryFragment
 import com.blazemuzix.app.ui.player.PlayerActivity
 import com.blazemuzix.app.ui.search.SearchFragment
+import com.blazemuzix.app.ui.shorts.ShortsFragment
+import com.blazemuzix.app.auth.WelcomeActivity
 import com.blazemuzix.app.utils.Appearance
 import com.blazemuzix.app.utils.Artwork
 import com.blazemuzix.app.utils.applySystemBarInsets
@@ -53,6 +55,9 @@ class MainActivity : AppCompatActivity(), Navigator {
         val root = findViewById<View>(R.id.root)
         root.applySystemBarInsets(top = true, bottom = true)
         Appearance.decorate(this, root)
+        if (!prefs.welcomeCompleted && BlazeApp.graph(this).googleAuth.current == null) {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+        }
 
         bottomNav = findViewById(R.id.bottom_nav)
         offlineBanner = findViewById(R.id.offline_banner)
@@ -71,6 +76,7 @@ class MainActivity : AppCompatActivity(), Navigator {
             when (menuItem.itemId) {
                 R.id.nav_home -> showTab(TAG_HOME)
                 R.id.nav_search -> showTab(TAG_SEARCH)
+                R.id.nav_shorts -> showTab(TAG_SHORTS)
                 R.id.nav_library -> showTab(TAG_LIBRARY)
             }
             true
@@ -93,9 +99,9 @@ class MainActivity : AppCompatActivity(), Navigator {
             else -> com.google.android.material.navigation.NavigationBarView.LABEL_VISIBILITY_LABELED
         }
 
-        findViewById<View>(R.id.mini_player_card).setOnClickListener { openPlayer() }
         miniPlayPause.setOnClickListener { PlayerController.togglePlayPause(this) }
         findViewById<View>(R.id.mini_next).setOnClickListener { PlayerController.next(this) }
+        attachMiniPlayerSwipe()
 
         PlayerController.state.observe(this) { renderMiniPlayer(it) }
         PlayerController.position.observe(this) { pos ->
@@ -125,6 +131,7 @@ class MainActivity : AppCompatActivity(), Navigator {
         if (target == null) {
             target = when (tag) {
                 TAG_SEARCH -> SearchFragment()
+                TAG_SHORTS -> ShortsFragment()
                 TAG_LIBRARY -> LibraryFragment()
                 else -> HomeFragment()
             }
@@ -186,6 +193,31 @@ class MainActivity : AppCompatActivity(), Navigator {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && state.isPlaying) maybeRequestNotificationPermission()
     }
 
+    private fun attachMiniPlayerSwipe() {
+        val card = findViewById<View>(R.id.mini_player_card)
+        val detector = android.view.GestureDetector(this, object : android.view.GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(e: android.view.MotionEvent): Boolean = true
+            override fun onSingleTapUp(e: android.view.MotionEvent): Boolean {
+                openPlayer()
+                return true
+            }
+            override fun onFling(e1: android.view.MotionEvent?, e2: android.view.MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+                if (e1 == null) return false
+                val dx = e2.x - e1.x
+                if (kotlin.math.abs(dx) > 120 && kotlin.math.abs(velocityX) > kotlin.math.abs(velocityY)) {
+                    PlayerController.stop(this@MainActivity)
+                    return true
+                }
+                return false
+            }
+        })
+        card.setOnTouchListener { v, event ->
+            val handled = detector.onTouchEvent(event)
+            if (event.action == android.view.MotionEvent.ACTION_UP && !handled) v.performClick()
+            handled
+        }
+    }
+
     private fun maybeRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         val prefs = BlazeApp.graph(this).prefs
@@ -198,9 +230,10 @@ class MainActivity : AppCompatActivity(), Navigator {
     companion object {
         const val TAG_HOME = "home"
         const val TAG_SEARCH = "search"
+        const val TAG_SHORTS = "shorts"
         const val TAG_LIBRARY = "library"
         const val TAG_DETAIL = "detail"
-        private val TABS = setOf(TAG_HOME, TAG_SEARCH, TAG_LIBRARY)
+        private val TABS = setOf(TAG_HOME, TAG_SEARCH, TAG_SHORTS, TAG_LIBRARY)
         private const val REQ_NOTIFICATIONS = 77
     }
 }

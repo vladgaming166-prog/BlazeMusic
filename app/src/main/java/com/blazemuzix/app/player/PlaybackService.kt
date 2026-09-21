@@ -17,10 +17,12 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -28,6 +30,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.blazemuzix.app.BlazeApp
 import com.blazemuzix.app.R
@@ -53,7 +56,7 @@ import kotlinx.coroutines.launch
  *  - pauses when headphones are unplugged
  *  - releases everything and stops itself when idle
  */
-class PlaybackService : Service() {
+class PlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var prefs: AppPreferences
     private lateinit var session: MediaSessionCompat
@@ -78,6 +81,13 @@ class PlaybackService : Service() {
     private var currentArt: Bitmap? = null
     private var currentArtId: String? = null
     private var isForeground = false
+    private var sleepUntil: Long = 0L
+    private val sleepRunnable = Runnable {
+        pause()
+        sleepUntil = 0L
+        PlayerController.publishSleep(0L)
+        publish()
+    }
 
     private val currentIndex: Int get() = if (orderPos in order.indices) order[orderPos] else -1
     private val currentItem: MediaItem? get() = queue.getOrNull(currentIndex)
@@ -101,7 +111,9 @@ class PlaybackService : Service() {
             setCallback(sessionCallback)
             setSessionActivity(contentIntent())
         }
+        sessionToken = session.sessionToken
         publish()
+        restorePersistedQueue()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -122,9 +134,9 @@ class PlaybackService : Service() {
                 pendingQueue = null
                 addToQueue(items, intent.getBooleanExtra(EXTRA_PLAY_NEXT, false))
             }
-            ACTION_PLAY -> play()
+            ACTION_PLAY -> if (queue.isEmpty()) restorePersistedQueue(play = true) else play()
             ACTION_PAUSE -> pause()
-            ACTION_TOGGLE -> if (player?.isPlaying == true) pause() else play()
+            ACTION_TOGGLE -> if (queue.isEmpty()) restorePersistedQueue(play = true) else if (player?.isPlaying == true) pause() else play()
             ACTION_NEXT -> next(userInitiated = true)
             ACTION_PREVIOUS -> previous()
             ACTION_SEEK -> seekTo(intent.getLongExtra(EXTRA_POSITION, 0L))
@@ -133,6 +145,8 @@ class PlaybackService : Service() {
             ACTION_TOGGLE_SHUFFLE -> toggleShuffle()
             ACTION_CYCLE_REPEAT -> cycleRepeat()
             ACTION_STOP -> stopPlayback()
+            ACTION_SLEEP -> setSleepTimer(intent.getLongExtra(EXTRA_SLEEP_MS, 0L))
+            ACTION_MOVE_QUEUE -> moveQueueItem(intent.getIntExtra(EXTRA_FROM, -1), intent.getIntExtra(EXTRA_TO, -1))
             else -> Unit
         }
         // Android 8+ requires a foreground notification shortly after startForegroundService();
@@ -145,7 +159,12 @@ class PlaybackService : Service() {
         return START_NOT_STICKY
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot =
+        BrowserRoot("blazemuzix_root", null)
+
+    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
+        result.sendResult(mutableListOf())
+    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
@@ -168,10 +187,10 @@ class PlaybackService : Service() {
 
     // ------------------------------------------------------------------ queue
 
-    private fun setQueue(items: List<MediaItem>, startIndex: Int) {
+    private fun setQueue(items: List<MediaItem>, startIndex: Int, autoPlay: Boolean = true) {
         queue = ArrayList(items)
         rebuildOrder(startIndex.coerceIn(0, queue.lastIndex))
-        prepareCurrent(autoPlay = true)
+        prepareCurrent(autoPlay = autoPlay)
     }
 
     private fun addToQueue(items: List<MediaItem>, playNext: Boolean) {
@@ -260,6 +279,60 @@ class PlaybackService : Service() {
             RepeatMode.ONE -> RepeatMode.OFF
         }
         publish()
+    }
+
+    private fun moveQueueItem(from: Int, to: Int) {
+        if (from !in queue.indices || to !in queue.indices || from == to) return
+        val currentId = currentItem?.id
+        val item = queue.removeAt(from)
+        queue.add(to, item)
+        rebuildOrder(queue.indexOfFirst { it.id == currentId }.coerceAtLeast(0))
+        publish()
+    }
+
+    private fun setSleepTimer(durationMs: Long) {
+        handler.removeCallbacks(sleepRunnable)
+        sleepUntil = if (durationMs <= 0L) 0L else System.currentTimeMillis() + durationMs
+        if (sleepUntil > 0L) handler.postDelayed(sleepRunnable, durationMs)
+        PlayerController.publishSleep(sleepUntil)
+        publish()
+    }
+
+    private fun restorePersistedQueue(play: Boolean = false) {
+        scope.launch(Dispatchers.IO) {
+            val saved = runCatching { BlazeApp.graph(this@PlaybackService).library.loadQueue() }.getOrNull() ?: return@launch
+            if (saved.items.isEmpty()) return@launch
+            launch(Dispatchers.Main) {
+                if (queue.isNotEmpty()) {
+                    if (play) play()
+                    return@launch
+                }
+                shuffle = saved.shuffle
+                repeat = when (saved.repeat) {
+                    "all" -> RepeatMode.ALL
+                    "one" -> RepeatMode.ONE
+                    else -> RepeatMode.OFF
+                }
+                setQueue(saved.items, saved.index, autoPlay = play)
+            }
+        }
+    }
+
+    private fun persistQueueAsync() {
+        val snapshot = queue.toList()
+        val idx = currentIndex
+        val sh = shuffle
+        val rp = when (repeat) {
+            RepeatMode.ALL -> "all"
+            RepeatMode.ONE -> "one"
+            else -> "off"
+        }
+        scope.launch(Dispatchers.IO) {
+            runCatching {
+                val lib = BlazeApp.graph(this@PlaybackService).library
+                if (snapshot.isEmpty()) lib.clearQueue() else lib.persistQueue(snapshot, idx, sh, rp)
+            }
+        }
     }
 
     // --------------------------------------------------------------- playback
@@ -460,6 +533,7 @@ class PlaybackService : Service() {
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         isForeground = false
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        scope.launch(Dispatchers.IO) { runCatching { BlazeApp.graph(this@PlaybackService).library.clearQueue() } }
         stopSelf()
     }
 
@@ -669,9 +743,11 @@ class PlaybackService : Service() {
                 shuffle = shuffle,
                 repeat = repeat,
                 durationMs = safeDuration(),
-                error = error
+                error = error,
+                sleepUntilEpoch = sleepUntil
             )
         )
+        persistQueueAsync()
         if (currentItem != null) refreshNotification()
     }
 
@@ -789,11 +865,16 @@ class PlaybackService : Service() {
         const val ACTION_TOGGLE_SHUFFLE = "com.blazemuzix.app.action.TOGGLE_SHUFFLE"
         const val ACTION_CYCLE_REPEAT = "com.blazemuzix.app.action.CYCLE_REPEAT"
         const val ACTION_STOP = "com.blazemuzix.app.action.STOP"
+        const val ACTION_SLEEP = "com.blazemuzix.app.action.SLEEP"
+        const val ACTION_MOVE_QUEUE = "com.blazemuzix.app.action.MOVE_QUEUE"
 
         const val EXTRA_INDEX = "index"
         const val EXTRA_POSITION = "position"
         const val EXTRA_SHUFFLE = "shuffle"
         const val EXTRA_PLAY_NEXT = "play_next"
+        const val EXTRA_SLEEP_MS = "sleep_ms"
+        const val EXTRA_FROM = "from"
+        const val EXTRA_TO = "to"
 
         /**
          * Queues are handed over in-process instead of through Intent extras to

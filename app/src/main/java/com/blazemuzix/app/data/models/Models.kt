@@ -34,14 +34,18 @@ data class Playlist(
     val artworkUrl: String? = null
 )
 
-/** Search filter tabs. `null` type means "everything". */
-enum class SearchFilter(val type: MediaType?) {
+/** Search filter tabs. `null` type means "everything". Source restricts to one provider. */
+enum class SearchFilter(val type: MediaType?, val source: Source? = null) {
     ALL(null),
     SONGS(MediaType.SONG),
     ALBUMS(MediaType.ALBUM),
     ARTISTS(MediaType.ARTIST),
     PLAYLISTS(MediaType.PLAYLIST),
-    VIDEOS(MediaType.VIDEO)
+    VIDEOS(MediaType.VIDEO),
+    SHORTS(MediaType.SHORT),
+    LOCAL(null, Source.LOCAL),
+    YOUTUBE(null, Source.YOUTUBE),
+    SPOTIFY(null, Source.SPOTIFY)
 }
 
 /**

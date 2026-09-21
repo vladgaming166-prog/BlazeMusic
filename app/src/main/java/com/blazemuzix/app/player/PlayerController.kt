@@ -77,8 +77,23 @@ object PlayerController {
     fun removeFromQueue(context: Context, index: Int) =
         send(context, PlaybackService.ACTION_REMOVE_FROM_QUEUE, PlaybackService.EXTRA_INDEX to index)
 
+    fun moveQueueItem(context: Context, from: Int, to: Int) =
+        send(context, PlaybackService.ACTION_MOVE_QUEUE, PlaybackService.EXTRA_FROM to from, PlaybackService.EXTRA_TO to to)
+
+    fun setSleepTimer(context: Context, durationMs: Long) =
+        send(context, PlaybackService.ACTION_SLEEP, PlaybackService.EXTRA_SLEEP_MS to durationMs)
+
+    fun cancelSleepTimer(context: Context) = setSleepTimer(context, 0L)
+
+    private val _sleepUntil = MutableLiveData(0L)
+    val sleepUntil: LiveData<Long> get() = _sleepUntil
+
+    internal fun publishSleep(epoch: Long) {
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) _sleepUntil.value = epoch else _sleepUntil.postValue(epoch)
+    }
+
     private fun send(context: Context, action: String, vararg extras: Pair<String, Any>) {
-        if (!current.hasContent && action != PlaybackService.ACTION_STOP) return
+        if (!current.hasContent && action != PlaybackService.ACTION_STOP && action != PlaybackService.ACTION_PLAY && action != PlaybackService.ACTION_TOGGLE) return
         val intent = serviceIntent(context, action)
         for ((k, v) in extras) {
             when (v) {

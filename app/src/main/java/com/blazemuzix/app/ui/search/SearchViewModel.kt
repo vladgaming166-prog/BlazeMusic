@@ -97,7 +97,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             _state.value = State.Loading(text)
             if (record) graph.library.recordSearch(text).also { refreshHistory() }
             try {
-                val result = graph.discovery.search(text, filter.type, null)
+                val result = graph.discovery.search(text, filter.type, null, sourceForFilter())
                 cursors = result.cursors
                 accumulated = result.items
                 publish(text, result.errors, loadingMore = false)
@@ -117,7 +117,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = State.Success(current.results.copy(loadingMore = true))
         searchJob = viewModelScope.launch {
             try {
-                val result = graph.discovery.search(text, filter.type, activeCursors)
+                val result = graph.discovery.search(text, filter.type, activeCursors, sourceForFilter())
                 val seen = accumulated.map { it.id }.toHashSet()
                 accumulated = accumulated + result.items.filter { seen.add(it.id) }
                 publish(text, result.errors, loadingMore = false)
@@ -152,6 +152,8 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             refreshHistory()
         }
     }
+
+    private fun sourceForFilter(): com.blazemuzix.app.data.models.Source? = filter.source
 
     companion object {
         private const val DEBOUNCE_MS = 450L

@@ -105,6 +105,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filter_playlists" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_videos"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_videos" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_shorts"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_shorts" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_local"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_local" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_youtube"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_youtube" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_spotify"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_spotify" />
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 

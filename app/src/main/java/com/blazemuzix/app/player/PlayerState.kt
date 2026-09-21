@@ -13,7 +13,8 @@ data class PlayerState(
     val shuffle: Boolean = false,
     val repeat: RepeatMode = RepeatMode.OFF,
     val durationMs: Long = 0L,
-    val error: String? = null
+    val error: String? = null,
+    val sleepUntilEpoch: Long = 0L
 ) {
     val hasContent: Boolean get() = current != null
 }

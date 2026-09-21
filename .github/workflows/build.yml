@@ -21,11 +21,11 @@ jobs:
     timeout-minutes: 45
 
     env:
-      # Optional provider credentials. This release is local-only (online providers are
-      # compiled out), so these can be left unset; they are kept for a future online build.
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY || vars.YOUTUBE_API_KEY }}
       SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
       SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+      SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI || 'blazemuzix://callback' }}
+      GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID || vars.GOOGLE_WEB_CLIENT_ID }}
       HAS_RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 != '' }}
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx3g
 
@@ -57,6 +57,16 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Report provider configuration
+        run: |
+          flag() { if [ -n "$1" ]; then echo set; else echo MISSING; fi; }
+          echo "YOUTUBE_API_KEY: $(flag "$YOUTUBE_API_KEY")"
+          echo "SPOTIFY_CLIENT_ID: $(flag "$SPOTIFY_CLIENT_ID")"
+          echo "SPOTIFY_CLIENT_SECRET: $(flag "$SPOTIFY_CLIENT_SECRET")"
+          echo "GOOGLE_WEB_CLIENT_ID: $(flag "$GOOGLE_WEB_CLIENT_ID")"
+          echo "SPOTIFY_REDIRECT_URI: ${SPOTIFY_REDIRECT_URI:-blazemuzix://callback}"
+          if [ "$HAS_RELEASE_KEYSTORE" = true ]; then echo "RELEASE_KEYSTORE: set"; else echo "RELEASE_KEYSTORE: missing (debug key will be used)"; fi
+
       - name: Decode release keystore (optional)
         if: env.HAS_RELEASE_KEYSTORE == 'true'
         run: |
@@ -68,6 +78,9 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Lint (non-blocking)
+        run: ./gradlew lintDebug --stacktrace || true
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace

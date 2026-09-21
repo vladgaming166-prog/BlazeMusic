@@ -96,6 +96,10 @@ class PlayerActivity : AppCompatActivity() {
         repeat.setOnClickListener { PlayerController.cycleRepeat(this) }
         favorite.setOnClickListener { toggleFavorite() }
         queueButton.setOnClickListener { QueueSheet().show(supportFragmentManager, "queue") }
+        findViewById<View>(R.id.player_sleep).setOnClickListener { showSleepPicker() }
+        findViewById<View>(R.id.player_share).setOnClickListener {
+            PlayerController.current.current?.let { com.blazemuzix.app.utils.ExternalActions.share(this, it) }
+        }
 
         androidx.core.view.ViewCompat.setBackgroundTintList(playPause, android.content.res.ColorStateList.valueOf(Appearance.accentColor(this)))
         // Player customisation: every switch here maps to a real view.
@@ -130,7 +134,10 @@ class PlayerActivity : AppCompatActivity() {
             val total = PlayerController.current.durationMs
             seek.progress = if (total > 0) (pos * 1000 / total).toInt().coerceIn(0, 1000) else 0
             position.text = Formatters.position(pos)
+            if (total > 0) duration.text = getString(R.string.player_remaining, Formatters.position((total - pos).coerceAtLeast(0)))
+            updateSleepLabel(PlayerController.sleepUntil.value ?: 0L)
         }
+        PlayerController.sleepUntil.observe(this) { updateSleepLabel(it) }
         BlazeApp.graph(this).library.changes.observe(this) { renderFavorite(PlayerController.current.current) }
     }
 
@@ -185,6 +192,57 @@ class PlayerActivity : AppCompatActivity() {
         }
         if (n == 0L) return Color.GRAY
         return Color.rgb((r / n).toInt(), (g / n).toInt(), (b / n).toInt())
+    }
+
+    private fun showSleepPicker() {
+        val labels = arrayOf(
+            getString(R.string.player_sleep_15),
+            getString(R.string.player_sleep_30),
+            getString(R.string.player_sleep_45),
+            getString(R.string.player_sleep_60),
+            getString(R.string.player_sleep_custom),
+            getString(R.string.player_sleep_off)
+        )
+        val minutes = intArrayOf(15, 30, 45, 60, -1, 0)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.player_sleep_timer)
+            .setItems(labels) { _, which ->
+                val m = minutes[which]
+                when {
+                    m == 0 -> PlayerController.cancelSleepTimer(this)
+                    m > 0 -> {
+                        PlayerController.setSleepTimer(this, m * 60_000L)
+                        toast(R.string.player_sleep_set)
+                    }
+                    else -> {
+                        val input = android.widget.EditText(this).apply {
+                            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+                            hint = "1–180"
+                        }
+                        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setTitle(R.string.player_sleep_custom)
+                            .setView(input)
+                            .setPositiveButton(R.string.action_ok) { _, _ ->
+                                val value = input.text.toString().toIntOrNull()?.coerceIn(1, 180) ?: return@setPositiveButton
+                                PlayerController.setSleepTimer(this, value * 60_000L)
+                                toast(R.string.player_sleep_set)
+                            }
+                            .setNegativeButton(R.string.action_cancel, null)
+                            .show()
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun updateSleepLabel(epoch: Long) {
+        val button = findViewById<MaterialButton>(R.id.player_sleep)
+        if (epoch <= 0L) {
+            button.text = getString(R.string.player_sleep_timer)
+            return
+        }
+        val remaining = (epoch - System.currentTimeMillis()).coerceAtLeast(0L)
+        button.text = getString(R.string.player_sleep_remaining, Formatters.position(remaining))
     }
 
     private fun progressToMs(progress: Int): Long {

@@ -14,12 +14,16 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <!-- Used to detect whether the official Spotify / YouTube apps are installed (Android 11+). -->
     <queries>
         <package android:name="com.spotify.music" />
         <package android:name="com.google.android.youtube" />
         <package android:name="com.google.android.apps.youtube.music" />
+        <package android:name="com.google.android.gms" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -56,6 +60,25 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".auth.WelcomeActivity" android:exported="false" />
+        <activity android:name=".auth.SignInActivity" android:exported="false" />
+        <activity android:name=".auth.CreateAccountActivity" android:exported="false" />
+        <activity android:name=".auth.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".auth.AccountActivity" android:exported="false" android:label="@string/title_account" />
+        <activity
+            android:name=".auth.SpotifyAuthActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="callback"
+                    android:scheme="blazemuzix" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.player.PlayerActivity"
             android:exported="false"
@@ -76,11 +99,12 @@
 
         <service
             android:name=".player.PlaybackService"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             tools:targetApi="q">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
 

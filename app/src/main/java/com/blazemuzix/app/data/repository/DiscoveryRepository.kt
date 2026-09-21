@@ -42,7 +42,11 @@ class DiscoveryRepository(
         val sections = ArrayList<Section>()
         val errors = ArrayList<Throwable>()
 
-        recent.await().takeIf { it.isNotEmpty() }?.let {
+        val recentItems = recent.await()
+        recentItems.firstOrNull()?.let {
+            sections.add(Section("continue", R.string.section_continue, listOf(it), SectionLayout.ROWS))
+        }
+        recentItems.drop(1).takeIf { it.isNotEmpty() }?.let {
             sections.add(Section("recent", R.string.section_recently_played, it, SectionLayout.CARDS))
         }
         val localSections = local.await()
@@ -50,12 +54,30 @@ class DiscoveryRepository(
         for (job in onlineJobs) {
             job.await().fold(onSuccess = { onlineSections.addAll(it) }, onFailure = { errors.add(it) })
         }
-        // Order: recently played, recently added, favorites, albums, artists, then any online sections.
         localSections.firstOrNull()?.let { sections.add(it) }
         favorites.await().takeIf { it.isNotEmpty() }?.let {
             sections.add(Section("favorites", R.string.section_favorites, it.take(20), SectionLayout.CARDS))
         }
         sections.addAll(localSections.drop(1))
+        if (!offline) {
+            val seed = recentItems.firstOrNull()
+            if (seed != null && providers.configuredOnline.isNotEmpty()) {
+                val related = runCatching {
+                    search(seed.artist.takeIf { it.isNotBlank() } ?: seed.title, MediaType.SONG, null).items
+                        .filter { it.id != seed.id }
+                        .take(12)
+                }.getOrDefault(emptyList())
+                related.takeIf { it.isNotEmpty() }?.let {
+                    sections.add(Section("because", R.string.section_because, it, SectionLayout.CARDS))
+                }
+            }
+            if (providers.youtube.isConfigured) {
+                val shorts = runCatching { providers.youtube.shorts(null).items.take(8) }.getOrDefault(emptyList())
+                shorts.takeIf { it.isNotEmpty() }?.let {
+                    sections.add(Section("shorts_teaser", R.string.section_shorts, it, SectionLayout.WIDE_CARDS, Source.YOUTUBE))
+                }
+            }
+        }
         sections.addAll(onlineSections)
         HomeResult(sections, errors, offline)
     }
@@ -70,8 +92,8 @@ class DiscoveryRepository(
         val hasMore: Boolean get() = cursors.any { !it.exhausted && it.error == null }
     }
 
-    suspend fun search(query: String, type: MediaType?, cursors: List<ProviderCursor>? = null): SearchResult = coroutineScope {
-        val active = cursors ?: buildCursors(type)
+    suspend fun search(query: String, type: MediaType?, cursors: List<ProviderCursor>? = null, source: Source? = null): SearchResult = coroutineScope {
+        val active = cursors ?: buildCursors(type, source)
         val offline = !network.isOnline
         val jobs = active.filter { !it.exhausted && it.error == null }.map { cursor ->
             async {
@@ -106,10 +128,16 @@ class DiscoveryRepository(
             .map { with(com.blazemuzix.app.ui.library.LibraryViewModel) { it.toMediaItem() } }
     }
 
-    private fun buildCursors(type: MediaType?): List<ProviderCursor> {
+    private fun buildCursors(type: MediaType?, source: Source? = null): List<ProviderCursor> {
         val list = ArrayList<ProviderCursor>()
-        if (type == null || type in providers.local.supportedSearchTypes) list.add(ProviderCursor(providers.local, null))
+        val includeLocal = (source == null || source == Source.LOCAL) &&
+            type != MediaType.SHORT && type != MediaType.VIDEO
+        if (includeLocal && (type == null || type in providers.local.supportedSearchTypes)) {
+            list.add(ProviderCursor(providers.local, null))
+        }
+        if (source == Source.LOCAL) return list
         for (p in providers.configuredOnline) {
+            if (source != null && p.source != source && !(source == Source.YOUTUBE_MUSIC && p.source == Source.YOUTUBE)) continue
             if (type == null || type in p.supportedSearchTypes || (type == MediaType.SONG && MediaType.VIDEO in p.supportedSearchTypes)) {
                 list.add(ProviderCursor(p, null))
             }

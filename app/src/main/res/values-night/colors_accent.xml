@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="accent_emerald">#34D399</color>
+    <color name="accent_emerald_variant">#10B981</color>
+    <color name="accent_emerald_container">#0A2A1E</color>
+    <color name="accent_mint">#5EEAD4</color>
+    <color name="accent_mint_variant">#2DD4BF</color>
+    <color name="accent_mint_container">#0E2A28</color>
+    <color name="accent_lime">#A3E635</color>
+    <color name="accent_lime_variant">#84CC16</color>
+    <color name="accent_lime_container">#1A2A0A</color>
     <color name="accent_teal">#5EEAD4</color>
     <color name="accent_teal_variant">#2DD4BF</color>
     <color name="accent_teal_container">#12312C</color>

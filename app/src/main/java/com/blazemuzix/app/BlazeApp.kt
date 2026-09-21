@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.multidex.MultiDexApplication
+import com.blazemuzix.app.auth.GoogleAuth
+import com.blazemuzix.app.auth.SecureStore
+import com.blazemuzix.app.auth.SpotifyAuth
 import com.blazemuzix.app.data.cache.ResponseCache
 import com.blazemuzix.app.data.db.BlazeDatabase
 import com.blazemuzix.app.data.prefs.AppPreferences
@@ -12,6 +15,7 @@ import com.blazemuzix.app.data.repository.LibraryRepository
 import com.blazemuzix.app.network.HttpClient
 import com.blazemuzix.app.network.NetworkMonitor
 import com.blazemuzix.app.providers.LocalMusicProvider
+import com.blazemuzix.app.providers.ProviderManager
 import com.blazemuzix.app.providers.ProviderRegistry
 import com.blazemuzix.app.providers.SpotifyProvider
 import com.blazemuzix.app.providers.YouTubeProvider
@@ -45,7 +49,27 @@ class BlazeApp : MultiDexApplication() {
         graph = Graph(this)
         graph.prefs.ensureDefaults()
         graph.prefs.applyTheme()
-        appScope.launch { graph.library.warmUp() }
+        graph.googleAuth.restoreFromLastAccount()
+        appScope.launch {
+            graph.library.warmUp()
+            val saved = runCatching { graph.library.loadQueue() }.getOrNull()
+            if (saved != null && saved.items.isNotEmpty()) {
+                val item = saved.items.getOrNull(saved.index.coerceIn(0, saved.items.lastIndex))
+                com.blazemuzix.app.player.PlayerController.publish(
+                    com.blazemuzix.app.player.PlayerState(
+                        current = item,
+                        queue = saved.items,
+                        index = saved.index,
+                        shuffle = saved.shuffle,
+                        repeat = when (saved.repeat) {
+                            "all" -> com.blazemuzix.app.player.RepeatMode.ALL
+                            "one" -> com.blazemuzix.app.player.RepeatMode.ONE
+                            else -> com.blazemuzix.app.player.RepeatMode.OFF
+                        }
+                    )
+                )
+            }
+        }
     }
 
     override fun onTrimMemory(level: Int) {
@@ -60,10 +84,20 @@ class BlazeApp : MultiDexApplication() {
         val network = NetworkMonitor(context)
         val http = HttpClient(network, responseCache)
         val library = LibraryRepository(database)
+        val secureStore = SecureStore(context)
+        val googleAuth = GoogleAuth(context)
+        val spotifyAuth = SpotifyAuth(context, http, secureStore)
         val localProvider = LocalMusicProvider(context)
         val youtubeProvider = YouTubeProvider(http, BuildConfig.YOUTUBE_API_KEY)
-        val spotifyProvider = SpotifyProvider(http, BuildConfig.SPOTIFY_CLIENT_ID, BuildConfig.SPOTIFY_CLIENT_SECRET)
+        val spotifyProvider = SpotifyProvider(
+            http,
+            BuildConfig.SPOTIFY_CLIENT_ID,
+            BuildConfig.SPOTIFY_CLIENT_SECRET,
+            userAccessToken = { spotifyAuth.validAccessToken() },
+            signedIn = { spotifyAuth.isSignedIn }
+        )
         val providers = ProviderRegistry(localProvider, youtubeProvider, spotifyProvider, onlineEnabled = BuildConfig.ONLINE_PROVIDERS)
+        val providerManager = ProviderManager(context, providers, googleAuth, spotifyAuth)
         val discovery = DiscoveryRepository(providers, library, network)
     }
 

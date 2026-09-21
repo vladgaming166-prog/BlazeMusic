@@ -249,17 +249,45 @@
             app:tint="@color/white_70" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/space_s"
+        android:layout_marginBottom="@dimen/space_l">
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/player_queue"
         style="@style/Widget.BlazeMuzix.Button.Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/space_s"
-        android:layout_marginBottom="@dimen/space_l"
         android:text="@string/title_queue"
         android:textColor="@color/white_70"
         app:icon="@drawable/ic_queue"
         app:iconGravity="textStart"
         app:iconTint="@color/white_70" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_sleep"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_sleep_timer"
+        android:textColor="@color/white_70"
+        app:icon="@drawable/ic_history"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white_70" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/player_share"
+        style="@style/Widget.BlazeMuzix.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/action_share"
+        android:textColor="@color/white_70"
+        app:icon="@drawable/ic_share"
+        app:iconGravity="textStart"
+        app:iconTint="@color/white_70" />
+    </LinearLayout>
 </LinearLayout>

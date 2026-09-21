@@ -32,6 +32,11 @@ class LocalMusicProvider(context: Context) : MusicProvider {
     override val isConfigured = true
     override val requiresNetwork = false
     override val supportedSearchTypes = setOf(MediaType.SONG, MediaType.ALBUM, MediaType.ARTIST)
+    override val capabilities = setOf(
+        ProviderCapability.SEARCH, ProviderCapability.METADATA, ProviderCapability.PLAYBACK,
+        ProviderCapability.BACKGROUND_PLAYBACK, ProviderCapability.OFFLINE, ProviderCapability.PLAYLISTS,
+        ProviderCapability.LIKES, ProviderCapability.ARTISTS, ProviderCapability.ALBUMS
+    )
 
     @Volatile
     private var cache: List<MediaItem>? = null
@@ -166,6 +171,32 @@ class LocalMusicProvider(context: Context) : MusicProvider {
     /** Local files are the user's own; they are always available offline. */
     override fun supportsOfflineDownload(item: MediaItem): Boolean = false
 
+    data class DeleteOutcome(val deleted: Int, val pendingIntent: android.app.PendingIntent?)
+
+    /**
+     * Deletes the user's own local audio files. On Android 11+ this returns a
+     * system confirmation [PendingIntent] that the UI must launch. Never called
+     * without an explicit confirmation dialog.
+     */
+    fun requestDelete(items: List<MediaItem>): DeleteOutcome {
+        val uris = items.mapNotNull { it.playbackUri?.let { uri -> Uri.parse(uri) } }
+        if (uris.isEmpty()) return DeleteOutcome(0, null)
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                DeleteOutcome(0, MediaStore.createDeleteRequest(appContext.contentResolver, uris))
+            } else {
+                var n = 0
+                for (uri in uris) {
+                    try { n += appContext.contentResolver.delete(uri, null, null) } catch (_: Exception) {}
+                }
+                invalidate()
+                DeleteOutcome(n, null)
+            }
+        } catch (_: Exception) {
+            DeleteOutcome(0, null)
+        }
+    }
+
     private fun query(): List<MediaItem> {
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -175,8 +206,10 @@ class LocalMusicProvider(context: Context) : MusicProvider {
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.DATE_ADDED
-        )
+            MediaStore.Audio.Media.DATE_ADDED,
+            MediaStore.Audio.Media.YEAR,
+            MediaStore.Audio.Media.TRACK
+        ) + if (Build.VERSION.SDK_INT >= 30) arrayOf("genre") else emptyArray()
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DURATION + " > 20000"
         val list = ArrayList<MediaItem>()
         try {
@@ -192,6 +225,9 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                 val durationIdx = c.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
                 val dataIdx = c.getColumnIndex(MediaStore.Audio.Media.DATA)
                 val addedIdx = c.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
+                val yearIdx = c.getColumnIndex(MediaStore.Audio.Media.YEAR)
+                val trackIdx = c.getColumnIndex(MediaStore.Audio.Media.TRACK)
+                val genreIdx = c.getColumnIndex("genre")
                 while (c.moveToNext()) {
                     val id = c.getLong(idIdx)
                     val artist = c.getString(artistIdx)?.takeIf { it.isNotBlank() && it != MediaStore.UNKNOWN_STRING } ?: appContext.getString(R.string.unknown_artist)
@@ -212,7 +248,10 @@ class LocalMusicProvider(context: Context) : MusicProvider {
                             providerId = id.toString(),
                             playback = Playback.DIRECT,
                             localPath = if (dataIdx >= 0) c.getString(dataIdx) else null,
-                            dateAdded = if (addedIdx >= 0) c.getLong(addedIdx) else 0L
+                            dateAdded = if (addedIdx >= 0) c.getLong(addedIdx) else 0L,
+                            genre = if (genreIdx >= 0) c.getString(genreIdx)?.takeIf { it.isNotBlank() } else null,
+                            year = if (yearIdx >= 0) c.getInt(yearIdx) else 0,
+                            trackNumber = if (trackIdx >= 0) c.getInt(trackIdx) % 1000 else 0
                         )
                     )
                 }

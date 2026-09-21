@@ -208,8 +208,14 @@
 
         <SwitchPreferenceCompat
             android:key="pref_low_end_mode"
-            android:summary="@string/settings_low_end_mode_summary"
-            android:title="@string/settings_low_end_mode"
+            android:summary="@string/settings_performance_mode_summary"
+            android:title="@string/settings_performance_mode"
+            app:iconSpaceReserved="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_data_saver"
+            android:summary="@string/settings_data_saver_summary"
+            android:title="@string/settings_data_saver"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
@@ -241,6 +247,89 @@
             android:key="pref_storage_info"
             android:selectable="false"
             android:title="@string/settings_storage_info"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_accounts"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_account"
+            android:title="@string/settings_account"
+            android:summary="@string/auth_sign_in"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_providers"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_provider_youtube"
+            android:title="@string/provider_youtube"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_spotify"
+            android:title="@string/provider_spotify"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="pref_provider_local"
+            android:title="@string/provider_local"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_library"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            android:defaultValue="list"
+            android:entries="@array/library_style_entries"
+            android:entryValues="@array/library_style_values"
+            android:key="pref_library_style"
+            android:title="@string/settings_library_style"
+            app:iconSpaceReserved="false"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_downloads"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="pref_downloads_policy"
+            android:selectable="false"
+            android:title="@string/settings_downloads_policy"
+            android:summary="@string/settings_downloads_policy_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_notifications"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_notifications_playback"
+            android:summary="@string/settings_notifications_playback_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_audio"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_audio_focus"
+            android:summary="@string/settings_audio_focus_summary"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_category_accessibility"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:selectable="false"
+            android:title="@string/settings_large_text"
+            android:summary="@string/settings_large_text_summary"
             app:iconSpaceReserved="false" />
     </PreferenceCategory>
 

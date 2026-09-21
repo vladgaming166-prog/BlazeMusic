@@ -59,10 +59,31 @@ class BlazeDatabase(context: Context) : SQLiteOpenHelper(context.applicationCont
         db.execSQL("CREATE INDEX idx_recent_played ON $T_RECENT(played_at DESC)")
         db.execSQL("CREATE INDEX idx_cache_created ON $T_API_CACHE(created_at)")
         db.execSQL("CREATE INDEX idx_playlist_items ON $T_PLAYLIST_ITEMS(playlist_id, position)")
+        db.execSQL(
+            """CREATE TABLE $T_QUEUE (
+                position INTEGER PRIMARY KEY,
+                json TEXT NOT NULL)"""
+        )
+        db.execSQL(
+            """CREATE TABLE $T_QUEUE_META (
+                k TEXT PRIMARY KEY,
+                v TEXT NOT NULL)"""
+        )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // First schema version; future migrations go here.
+        if (oldVersion < 2) {
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS $T_QUEUE (
+                    position INTEGER PRIMARY KEY,
+                    json TEXT NOT NULL)"""
+            )
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS $T_QUEUE_META (
+                    k TEXT PRIMARY KEY,
+                    v TEXT NOT NULL)"""
+            )
+        }
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -72,7 +93,7 @@ class BlazeDatabase(context: Context) : SQLiteOpenHelper(context.applicationCont
 
     companion object {
         const val NAME = "blazemuzix.db"
-        const val VERSION = 1
+        const val VERSION = 2
 
         const val T_FAVORITES = "favorites"
         const val T_SAVED = "saved_items"
@@ -81,5 +102,7 @@ class BlazeDatabase(context: Context) : SQLiteOpenHelper(context.applicationCont
         const val T_PLAYLISTS = "playlists"
         const val T_PLAYLIST_ITEMS = "playlist_items"
         const val T_API_CACHE = "api_cache"
+        const val T_QUEUE = "playback_queue"
+        const val T_QUEUE_META = "playback_queue_meta"
     }
 }

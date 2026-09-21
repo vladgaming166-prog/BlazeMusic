@@ -1,19 +1,31 @@
 # Copy this file to `local.properties` (which is git-ignored) and fill in your own values.
 # The same keys can be provided as environment variables / GitHub Actions secrets instead.
-#
-# Path to your Android SDK (only needed for local builds, GitHub Actions sets it automatically).
+# Never commit real credentials.
+
+# Path to your Android SDK (only needed for local builds; GitHub Actions sets it automatically).
 sdk.dir=/path/to/Android/sdk
 
 # --- YouTube Data API v3 -----------------------------------------------------
 # Create a key at https://console.cloud.google.com/apis/credentials and enable
-# "YouTube Data API v3" for the project. Leave empty to disable the YouTube provider.
+# "YouTube Data API v3" for the project. Leave empty to disable YouTube.
 YOUTUBE_API_KEY=
 
 # --- Spotify Web API ---------------------------------------------------------
-# Create an app at https://developer.spotify.com/dashboard. BlazeMuzix uses the
-# official Client Credentials flow for catalog search/browse. Leave empty to disable.
+# Create an app at https://developer.spotify.com/dashboard.
+# Client ID is public and ships in the APK. Do NOT put a client *secret* in a
+# production store APK unless you accept that it can be extracted; PKCE sign-in
+# does not need the secret. Client credentials (secret) are optional catalog
+# fallback when the user is not signed in.
 SPOTIFY_CLIENT_ID=
 SPOTIFY_CLIENT_SECRET=
+# Must match a Redirect URI registered on the Spotify app:
+SPOTIFY_REDIRECT_URI=blazemuzix://callback
+
+# --- Google Sign-In ----------------------------------------------------------
+# Web application OAuth client ID from Google Cloud Console (not the Android
+# client). Used to request an OpenID ID token. Leave empty to still request
+# public profile/email without minting an ID token.
+GOOGLE_WEB_CLIENT_ID=
 
 # --- Optional release signing (see README "Release signing") ---------------
 # KEYSTORE_FILE=/absolute/path/to/release.jks

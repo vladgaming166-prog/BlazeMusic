@@ -34,6 +34,10 @@ class YouTubeProvider(
     override val displayName = "YouTube"
     override val isConfigured: Boolean get() = apiKey.isNotBlank()
     override val supportedSearchTypes = setOf(MediaType.VIDEO, MediaType.PLAYLIST, MediaType.ARTIST, MediaType.SHORT)
+    override val capabilities = setOf(
+        ProviderCapability.SEARCH, ProviderCapability.METADATA, ProviderCapability.PLAYBACK,
+        ProviderCapability.ARTISTS, ProviderCapability.PLAYLISTS, ProviderCapability.ALBUMS, ProviderCapability.SHORTS
+    )
 
     private fun requireConfigured() {
         if (!isConfigured) throw ApiException.NotConfigured(displayName)

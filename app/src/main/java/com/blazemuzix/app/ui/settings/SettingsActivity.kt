@@ -64,6 +64,18 @@ class SettingsActivity : AppCompatActivity() {
                 findPreference<Preference>(AppPreferences.KEY_NAV_BAR)?.apply { isEnabled = false; summary = getString(R.string.settings_bar_style_note) }
             }
             val graph = BlazeApp.graph(requireContext())
+            bindProviders(graph)
+            findPreference<Preference>("pref_provider_spotify")?.setOnPreferenceClickListener {
+                startActivity(android.content.Intent(requireContext(), com.blazemuzix.app.auth.AccountActivity::class.java))
+                true
+            }
+            findPreference<Preference>("pref_account")?.apply {
+                summary = graph.googleAuth.current?.email ?: getString(R.string.auth_guest)
+                setOnPreferenceClickListener {
+                    startActivity(android.content.Intent(requireContext(), com.blazemuzix.app.auth.AccountActivity::class.java))
+                    true
+                }
+            }
 
             findPreference<Preference>(AppPreferences.KEY_VERSION)?.summary = BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
 
@@ -96,6 +108,21 @@ class SettingsActivity : AppCompatActivity() {
         override fun onResume() {
             super.onResume()
             preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+            bindProviders(BlazeApp.graph(requireContext()))
+        }
+
+        private fun bindProviders(graph: com.blazemuzix.app.BlazeApp.Graph) {
+            val statuses = graph.providerManager.statuses()
+            statuses.forEach { status ->
+                val key = when (status.source) {
+                    com.blazemuzix.app.data.models.Source.YOUTUBE -> "pref_provider_youtube"
+                    com.blazemuzix.app.data.models.Source.SPOTIFY -> "pref_provider_spotify"
+                    else -> "pref_provider_local"
+                }
+                findPreference<Preference>(key)?.summary = status.detail
+            }
+            findPreference<Preference>("pref_account")?.summary =
+                graph.googleAuth.current?.email ?: getString(R.string.auth_guest)
         }
 
         override fun onPause() {
