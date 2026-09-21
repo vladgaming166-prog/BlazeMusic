@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/history_root"
+    android:layout_width="match_parent"
+    android:layout_height="52dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="@dimen/space_l"
+    android:paddingRight="@dimen/space_xs">
+
+    <ImageView
+        android:id="@+id/history_icon"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:importantForAccessibility="no"
+        app:srcCompat="@drawable/ic_history"
+        app:tint="?android:textColorSecondary" />
+
+    <TextView
+        android:id="@+id/history_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/space_l"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Body" />
+
+    <ImageButton
+        android:id="@+id/history_remove"
+        style="@style/Widget.BlazeMuzix.IconButton"
+        android:layout_width="@dimen/touch_target"
+        android:layout_height="@dimen/touch_target"
+        android:contentDescription="@string/action_remove"
+        app:srcCompat="@drawable/ic_close" />
+</LinearLayout>

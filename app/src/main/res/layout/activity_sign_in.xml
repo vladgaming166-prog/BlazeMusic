@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/auth_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/space_xl"
+    android:paddingRight="@dimen/space_xl">
+
+    <ImageButton
+        android:id="@+id/auth_back"
+        style="@style/Widget.BlazeMuzix.IconButton"
+        android:layout_width="@dimen/touch_target"
+        android:layout_height="@dimen/touch_target"
+        android:layout_marginTop="@dimen/space_m"
+        android:contentDescription="@string/action_back"
+            app:srcCompat="@drawable/ic_arrow_back" />
+
+    <TextView
+        android:id="@+id/auth_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xl"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Headline" />
+
+    <TextView
+        android:id="@+id/auth_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_s"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+        android:textColor="?android:attr/textColorSecondary" />
+
+    <TextView
+        android:id="@+id/auth_notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_l"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/auth_google"
+        style="@style/Widget.BlazeMuzix.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xl"
+        android:text="@string/auth_continue_google"
+        app:icon="@drawable/ic_person"
+        app:iconGravity="textStart" />
+
+    <TextView
+        android:id="@+id/auth_forgot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_l"
+        android:padding="@dimen/space_s"
+        android:text="@string/auth_forgot_password"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+        android:textColor="?attr/colorPrimary" />
+
+    <TextView
+        android:id="@+id/auth_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/space_s"
+        android:text="@string/auth_create_account"
+        android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+        android:textColor="?attr/colorPrimary" />
+</LinearLayout>

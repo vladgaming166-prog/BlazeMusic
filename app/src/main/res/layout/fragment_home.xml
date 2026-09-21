@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/home_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_l"
+        android:paddingTop="@dimen/space_m"
+        android:paddingRight="@dimen/space_s"
+        android:paddingBottom="@dimen/space_xs">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@string/cd_brand_logo"
+            app:srcCompat="@drawable/ic_brand_mark" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/space_m"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/home_greeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Headline"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.BlazeMuzix.Caption" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/home_account"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/title_account"
+            app:srcCompat="@drawable/ic_person" />
+
+        <ImageButton
+            android:id="@+id/home_settings"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="@dimen/touch_target"
+            android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/title_settings"
+            app:srcCompat="@drawable/ic_settings" />
+    </LinearLayout>
+
+    <!-- Quick access to the local library; hidden until music has been found. -->
+    <HorizontalScrollView
+        android:id="@+id/home_quick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/space_m"
+        android:paddingRight="@dimen/space_m"
+        android:paddingBottom="@dimen/space_xs"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/quick_shuffle"
+                style="@style/Widget.BlazeMuzix.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/home_quick_shuffle"
+                app:icon="@drawable/ic_shuffle"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/quick_songs"
+                style="@style/Widget.BlazeMuzix.Button.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/space_s"
+                android:text="@string/home_quick_songs"
+                app:icon="@drawable/ic_music_note"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/quick_albums"
+                style="@style/Widget.BlazeMuzix.Button.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/space_s"
+                android:text="@string/home_quick_albums"
+                app:icon="@drawable/ic_album"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/quick_artists"
+                style="@style/Widget.BlazeMuzix.Button.Tonal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/space_s"
+                android:text="@string/home_quick_artists"
+                app:icon="@drawable/ic_person"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/home_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingTop="@dimen/space_s"
+                android:paddingBottom="@dimen/space_l"
+                android:scrollbars="none" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <include
+            android:id="@+id/home_state"
+            layout="@layout/layout_state" />
+    </FrameLayout>
+</LinearLayout>

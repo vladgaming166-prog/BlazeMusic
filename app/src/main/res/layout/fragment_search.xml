@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        android:layout_marginLeft="@dimen/space_l"
+        android:layout_marginTop="@dimen/space_m"
+        android:layout_marginRight="@dimen/space_l"
+        android:background="@drawable/bg_search_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/space_l"
+        android:paddingRight="@dimen/space_xs">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:importantForAccessibility="no"
+            app:srcCompat="@drawable/ic_search"
+            app:tint="?android:textColorSecondary" />
+
+        <EditText
+            android:id="@+id/search_input"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/space_m"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/search_hint"
+            android:imeOptions="actionSearch|flagNoExtractUi"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.BlazeMuzix.Body"
+            android:textSize="16sp" />
+
+        <ImageButton
+            android:id="@+id/search_clear"
+            style="@style/Widget.BlazeMuzix.IconButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="@string/cd_search_clear"
+            app:srcCompat="@drawable/ic_close"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/search_filters_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_m"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/space_l"
+        android:paddingRight="@dimen/space_l"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/search_filters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipSpacingHorizontal="@dimen/space_s"
+            app:selectionRequired="true"
+            app:singleLine="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_all"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/filter_all" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_songs"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_songs" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_albums"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_albums" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_artists"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_artists" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_playlists"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_playlists" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_videos"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_videos" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_shorts"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_shorts" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_local"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_local" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_youtube"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_youtube" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/filter_spotify"
+                style="@style/Widget.BlazeMuzix.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_spotify" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="@dimen/space_s"
+            android:paddingBottom="@dimen/space_l"
+            android:scrollbars="vertical" />
+
+        <LinearLayout
+            android:id="@+id/search_history_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="@dimen/space_l"
+                android:paddingTop="@dimen/space_l"
+                android:paddingRight="@dimen/space_s">
+
+                <TextView
+                    android:id="@+id/search_history_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/search_recent"
+                    android:textAppearance="@style/TextAppearance.BlazeMuzix.Title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/search_clear_history"
+                    style="@style/Widget.BlazeMuzix.Button.Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_clear" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/search_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="@dimen/space_l" />
+        </LinearLayout>
+
+        <include
+            android:id="@+id/search_state"
+            layout="@layout/layout_state" />
+
+        <ProgressBar
+            android:id="@+id/search_progress"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="@dimen/space_l"
+            android:indeterminateTint="?attr/colorPrimary"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>
