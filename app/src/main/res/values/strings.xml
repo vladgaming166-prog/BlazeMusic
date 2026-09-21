@@ -70,7 +70,7 @@
     <string name="home_empty_title">Nothing to show yet</string>
     <string name="home_empty_message">Connect a music provider in Settings or add music to your device to start discovering.</string>
     <string name="home_no_providers_title">No online providers configured</string>
-    <string name="home_no_providers_message">Add a YouTube Data API key or Spotify credentials when building BlazeMuzix to enable online discovery. Local music still works.</string>
+    <string name="home_no_providers_message">This build has no provider credentials. Set YOUTUBE_API_KEY and/or SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET (local.properties or GitHub Secrets) and rebuild. Local music still works.</string>
 
     <!-- Search -->
     <string name="search_hint">Search songs, artists, albums…</string>
@@ -220,7 +220,7 @@
     <string name="settings_storage_info_summary">%1$d songs · %2$s on this device</string>
     <string name="settings_category_providers">Providers</string>
     <string name="settings_provider_status_configured">Configured · official API</string>
-    <string name="settings_provider_status_missing">Not configured · add credentials at build time</string>
+    <string name="settings_provider_status_missing">Not configured · set %1$s at build time</string>
     <string name="settings_provider_local_summary">Reads audio files through Android MediaStore</string>
     <string name="settings_category_other">Other</string>
     <string name="settings_about">About BlazeMuzix</string>

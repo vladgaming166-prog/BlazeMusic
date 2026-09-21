@@ -42,9 +42,9 @@ class SettingsActivity : AppCompatActivity() {
 
             findPreference<Preference>(AppPreferences.KEY_VERSION)?.summary = BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")"
             findPreference<Preference>(AppPreferences.KEY_PROVIDER_YOUTUBE)?.summary =
-                getString(if (graph.youtubeProvider.isConfigured) R.string.settings_provider_status_configured else R.string.settings_provider_status_missing)
+                if (graph.youtubeProvider.isConfigured) getString(R.string.settings_provider_status_configured) else getString(R.string.settings_provider_status_missing, "YOUTUBE_API_KEY")
             findPreference<Preference>(AppPreferences.KEY_PROVIDER_SPOTIFY)?.summary =
-                getString(if (graph.spotifyProvider.isConfigured) R.string.settings_provider_status_configured else R.string.settings_provider_status_missing)
+                if (graph.spotifyProvider.isConfigured) getString(R.string.settings_provider_status_configured) else getString(R.string.settings_provider_status_missing, "SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET")
 
             findPreference<Preference>(AppPreferences.KEY_CLEAR_CACHE)?.setOnPreferenceClickListener {
                 clearCache()

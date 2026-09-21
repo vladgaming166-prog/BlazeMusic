@@ -180,8 +180,29 @@ Repository secrets used by the workflow (all optional):
 Secrets are **never** committed. They are read at build time, in this order of precedence, and exposed through `BuildConfig`:
 
 1. Environment variables (`YOUTUBE_API_KEY`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`) — this is how GitHub Actions secrets arrive
-2. `local.properties` (git-ignored; see `local.properties.example`)
-3. Empty → the provider is reported as *not configured* in the app
+2. Gradle properties (`./gradlew assembleDebug -PYOUTUBE_API_KEY=…`)
+3. `local.properties` (git-ignored; see `local.properties.example`)
+4. Empty → the provider is reported as *not configured* in the app
+
+Credentials are compiled into the APK at build time, so **an APK built without them will always show "not configured"** — the fix is to add the credentials and rebuild, not to change the app.
+
+### Adding the secrets in GitHub (step by step)
+
+1. Open your repository on GitHub → **Settings** → **Secrets and variables** → **Actions**.
+2. Under **Repository secrets** click **New repository secret** and add, one at a time:
+
+   | Secret name | Value | Required for |
+   |---|---|---|
+   | `YOUTUBE_API_KEY` | Your YouTube Data API v3 key | YouTube provider (Home, Search, Blaze Shorts) |
+   | `SPOTIFY_CLIENT_ID` | Spotify app Client ID | Spotify provider |
+   | `SPOTIFY_CLIENT_SECRET` | Spotify app Client Secret | Spotify provider |
+
+   The YouTube key is a *public* API key (it necessarily ships inside the APK); you may add it under the **Variables** tab instead of Secrets if you prefer — the workflow accepts either. Spotify credentials must be **Secrets**.
+3. Run the workflow again (**Actions** → **Build BlazeMuzix APK** → **Run workflow**, or push to `main`). Secrets are only injected into runs started after they were created.
+4. In the run log, open the step **Report provider configuration**. It prints `YOUTUBE_API_KEY: set` / `MISSING` for each name (values are never printed). Gradle also logs `BlazeMuzix provider configuration: …` at the start of the build.
+5. Download the new APK artifact and install it. **Settings → Providers** inside the app shows *Configured · official API* for each enabled provider.
+
+Note: secrets are not available to workflows triggered by pull requests from forks — those builds intentionally produce a "not configured" APK.
 
 ### YouTube Data API v3
 1. Create a project in the [Google Cloud Console](https://console.cloud.google.com/), enable **YouTube Data API v3** and create an API key.

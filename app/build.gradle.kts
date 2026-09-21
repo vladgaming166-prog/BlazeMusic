@@ -20,8 +20,15 @@ val localProps = Properties().apply {
 
 fun secret(name: String): String =
     System.getenv(name)?.takeIf { it.isNotBlank() }
+        ?: (project.findProperty(name) as? String)?.takeIf { it.isNotBlank() }
         ?: localProps.getProperty(name)?.takeIf { it.isNotBlank() }
         ?: ""
+
+// Report which provider credentials reached the build (names only, never values) so a
+// misconfigured GitHub Secret is visible in the Actions log instead of only on the phone.
+val providerConfigSummary = listOf("YOUTUBE_API_KEY", "SPOTIFY_CLIENT_ID", "SPOTIFY_CLIENT_SECRET")
+    .joinToString(", ") { "$it=" + if (secret(it).isEmpty()) "missing" else "set" }
+logger.lifecycle("BlazeMuzix provider configuration: $providerConfigSummary")
 
 fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
